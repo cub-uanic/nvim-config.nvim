@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -104,8 +104,8 @@ vim.o.number = true
 --  Experiment for yourself to see if you like it!
 -- vim.o.relativenumber = true
 
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.o.mouse = 'a'
+-- Disable mouse mode
+vim.o.mouse = ''
 
 -- Don't show the mode, since it's already in the status line
 vim.o.showmode = false
@@ -388,6 +388,24 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
+
+        defaults = {
+          layout_strategy = 'flex', -- "bottom_pane", "horizontal", "vertical", "center"
+          layout_config = {
+            horizontal = {
+              -- prompt_position = "top",
+              -- mirror = false,
+              width = 0.55,
+              height = 0.55,
+            },
+            vertical = {
+              -- prompt_position = "top",
+              -- mirror = true,
+              width = 0.55,
+              height = 0.55,
+            },
+          },
+        },
         -- defaults = {
         --   mappings = {
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
@@ -415,7 +433,8 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader><leader>', builtin.live_grep, { desc = '[S]earch by [G]rep' })
 
       -- This runs on LSP attach per buffer (see main LSP attach function in 'neovim/nvim-lspconfig' config for more info,
       -- it is better explained there). This allows easily switching between pickers if you prefer using something else!
@@ -462,17 +481,12 @@ require('lazy').setup({
 
       -- It's also possible to pass additional configuration options.
       --  See `:help telescope.builtin.live_grep()` for information about particular keys
-      vim.keymap.set(
-        'n',
-        '<leader>s/',
-        function()
-          builtin.live_grep {
-            grep_open_files = true,
-            prompt_title = 'Live Grep in Open Files',
-          }
-        end,
-        { desc = '[S]earch [/] in Open Files' }
-      )
+      vim.keymap.set('n', '<leader>s/', function()
+        builtin.live_grep {
+          grep_open_files = true,
+         prompt_title = 'Live Grep in Open Files',
+        }
+      end, { desc = '[S]earch [/] in Open Files' })
 
       -- Shortcut for searching your Neovim configuration files
       vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
@@ -641,6 +655,28 @@ require('lazy').setup({
             Lua = {},
           },
         },
+
+        perlnavigator = {
+          cmd = { "perlnavigator" },
+          settings = {
+            perlnavigator = {
+                perlPath = 'perl',
+                enableWarnings = true,
+                perlcriticEnabled = true,
+                perlcriticProfile = '',
+                perltidyProfile = '',
+            }
+          }
+        },
+
+        perlpls = {
+          settings = {
+            perl = {
+              perlcritic = { enabled = true },
+            },
+          },
+        },
+
       }
 
       -- Ensure the servers and tools above are installed
@@ -655,12 +691,36 @@ require('lazy').setup({
         -- You can add other tools here that you want Mason to install
       })
 
+      -- require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+
+      -- for name, server in pairs(servers) do
+      --   vim.lsp.config(name, server)
+      --   vim.lsp.enable(name)
+      -- end
+
+
+      for i = #ensure_installed, 1, -1 do
+        if ensure_installed[i] == "perlpls" then
+          table.remove(ensure_installed, i)
+        end
+        if ensure_installed[i] == "perlnavigator" then
+          table.remove(ensure_installed, i)
+        end
+      end
+
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
-      for name, server in pairs(servers) do
-        vim.lsp.config(name, server)
-        vim.lsp.enable(name)
-      end
+      require('mason-lspconfig').setup {
+        ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
+        automatic_enable = true,
+      }
+
+      vim.lsp.config("perlpls", servers["perlpls"])
+      vim.lsp.enable("perlpls")
+
+      -- vim.lsp.config("perlnavigator", servers["perlnavigator"])
+      -- vim.lsp.enable("perlnavigator")
+
     end,
   },
 
@@ -696,6 +756,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        perl = { 'perltidy' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -725,12 +786,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
         opts = {},
       },
@@ -940,7 +1001,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -967,6 +1028,9 @@ require('lazy').setup({
     },
   },
 })
+
+require("custom.init")
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
