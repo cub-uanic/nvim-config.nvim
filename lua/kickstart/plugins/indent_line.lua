@@ -1,7 +1,6 @@
--- Add indentation guides even on blank lines
+-- vim: ts=2 sts=2 sw=2 et
+--
 
----@module 'lazy'
----@type LazySpec
 return {
   'lukas-reineke/indent-blankline.nvim',
   -- Enable `lukas-reineke/indent-blankline.nvim`
