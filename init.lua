@@ -484,7 +484,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>s/', function()
         builtin.live_grep {
           grep_open_files = true,
-         prompt_title = 'Live Grep in Open Files',
+          prompt_title = 'Live Grep in Open Files',
         }
       end, { desc = '[S]earch [/] in Open Files' })
 
@@ -656,19 +656,6 @@ require('lazy').setup({
           },
         },
 
-        perlnavigator = {
-          cmd = { "perlnavigator" },
-          settings = {
-            perlnavigator = {
-                perlPath = 'perl',
-                enableWarnings = true,
-                perlcriticEnabled = true,
-                perlcriticProfile = '',
-                perltidyProfile = '',
-            }
-          }
-        },
-
         perlpls = {
           settings = {
             perl = {
@@ -676,7 +663,6 @@ require('lazy').setup({
             },
           },
         },
-
       }
 
       -- Ensure the servers and tools above are installed
@@ -700,10 +686,10 @@ require('lazy').setup({
 
 
       for i = #ensure_installed, 1, -1 do
-        if ensure_installed[i] == "perlpls" then
+        if ensure_installed[i] == 'perlpls' then
           table.remove(ensure_installed, i)
         end
-        if ensure_installed[i] == "perlnavigator" then
+        if ensure_installed[i] == 'perlnavigator' then
           table.remove(ensure_installed, i)
         end
       end
@@ -715,12 +701,11 @@ require('lazy').setup({
         automatic_enable = true,
       }
 
-      vim.lsp.config("perlpls", servers["perlpls"])
-      vim.lsp.enable("perlpls")
+      vim.lsp.config('perlpls', servers['perlpls'])
+      vim.lsp.enable 'perlpls'
 
       -- vim.lsp.config("perlnavigator", servers["perlnavigator"])
       -- vim.lsp.enable("perlnavigator")
-
     end,
   },
 
@@ -1028,10 +1013,22 @@ require('lazy').setup({
       lazy = '💤 ',
     },
   },
+
+  -- auto update local config via Lazy
+  checker = {
+    enabled = true,
+    frequency = 600,
+    notify = true,
+  },
+  change_detection = {
+    notify = false,
+  },
+  git = {
+    fetch_interval = 600,
+  },
 })
 
-require("custom.init")
-
+require 'custom.init'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
