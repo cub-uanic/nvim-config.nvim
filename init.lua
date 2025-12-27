@@ -390,6 +390,7 @@ require('lazy').setup({
         --
 
         defaults = {
+          -- preview = { hide_on_startup = true },
           layout_strategy = 'flex', -- "bottom_pane", "horizontal", "vertical", "center"
           layout_config = {
             horizontal = {
@@ -412,6 +413,28 @@ require('lazy').setup({
         --   },
         -- },
         -- pickers = {}
+        pickers = {
+          find_files = {
+            entry_maker = function(line)
+              local entry_maker = require('telescope.make_entry').gen_from_file {}
+              local entry = entry_maker(line)
+              local filename = entry.filename or entry.path or entry.value
+              if filename then
+                local size = vim.fn.getfsize(filename)
+                if size == 0 then
+                  entry.display = function()
+                    local n = '[EMPTY] ' .. (entry.value or entry.filename)
+                    local hl = { { { 0, 7 }, 'ErrorMsg' } }
+                    return n, hl
+                  end
+                end
+              end
+
+              return entry
+            end,
+          },
+        },
+
         extensions = {
           ['ui-select'] = { require('telescope.themes').get_dropdown() },
         },
@@ -672,24 +695,22 @@ require('lazy').setup({
       --    :Mason
       --
       -- You can press `g?` for help in this menu.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        -- You can add other tools here that you want Mason to install
-      })
 
-      -- require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      ---- local ensure_installed = vim.tbl_keys(servers or {})
+      ---- vim.list_extend(ensure_installed, {
+      ----   -- You can add other tools here that you want Mason to install
+      ---- })
 
-      -- for name, server in pairs(servers) do
-      --   vim.lsp.config(name, server)
-      --   vim.lsp.enable(name)
-      -- end
+      ---- require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+
+      ---- for name, server in pairs(servers) do
+      ----   vim.lsp.config(name, server)
+      ----   vim.lsp.enable(name)
+      ---- end
 
 
       for i = #ensure_installed, 1, -1 do
         if ensure_installed[i] == 'perlpls' then
-          table.remove(ensure_installed, i)
-        end
-        if ensure_installed[i] == 'perlnavigator' then
           table.remove(ensure_installed, i)
         end
       end
@@ -703,9 +724,6 @@ require('lazy').setup({
 
       vim.lsp.config('perlpls', servers['perlpls'])
       vim.lsp.enable 'perlpls'
-
-      -- vim.lsp.config("perlnavigator", servers["perlnavigator"])
-      -- vim.lsp.enable("perlnavigator")
     end,
   },
 
