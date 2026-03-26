@@ -84,6 +84,9 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+---@diagnostic disable-next-line: undefined-global
+local vim = vim
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -114,9 +117,7 @@ vim.o.showmode = false
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
--- vim.schedule(function()
---   vim.o.clipboard = 'unnamedplus'
--- end)
+-- vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
 
 vim.schedule(function()
   -- Отключить автокопирование в системный буфер
@@ -124,9 +125,7 @@ vim.schedule(function()
   vim.o.clipboard = ''
   -- Нормальный режим: <leader>y — отправить последний yank/delete в системный буфер
   -- nnoremap <leader>y  :let @+ = @"<CR>
-  vim.keymap.set('n', '<leader>y', function()
-    vim.fn.setreg('+', vim.fn.getreg '"')
-  end, { desc = 'Send last yank/delete to system clipboard' })
+  vim.keymap.set('n', '<leader>y', function() vim.fn.setreg('+', vim.fn.getreg '"') end, { desc = 'Send last yank/delete to system clipboard' })
 
   -- Нормальный режим: <leader>Y + движение -> в системный буфер
   -- Визуальный режим: <leader>Y -> выделение в системный буфер
@@ -521,12 +520,17 @@ require('lazy').setup({
 
       -- It's also possible to pass additional configuration options.
       --  See `:help telescope.builtin.live_grep()` for information about particular keys
-      vim.keymap.set('n', '<leader>s/', function()
-        builtin.live_grep {
-          grep_open_files = true,
-          prompt_title = 'Live Grep in Open Files',
-        }
-      end, { desc = '[S]earch [/] in Open Files' })
+      vim.keymap.set(
+        'n',
+        '<leader>s/',
+        function()
+          builtin.live_grep {
+            grep_open_files = true,
+            prompt_title = 'Live Grep in Open Files',
+          }
+        end,
+        { desc = '[S]earch [/] in Open Files' }
+      )
 
       -- Shortcut for searching your Neovim configuration files
       vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
@@ -665,8 +669,6 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
 
-        stylua = {}, -- Used to format Lua code
-
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
           on_init = function(client)
@@ -713,23 +715,13 @@ require('lazy').setup({
       --
       -- You can press `g?` for help in this menu.
 
-      ---- local ensure_installed = vim.tbl_keys(servers or {})
-      ---- vim.list_extend(ensure_installed, {
-      ----   -- You can add other tools here that you want Mason to install
-      ---- })
-
-      ---- require('mason-tool-installer').setup { ensure_installed = ensure_installed }
-
-      ---- for name, server in pairs(servers) do
-      ----   vim.lsp.config(name, server)
-      ----   vim.lsp.enable(name)
-      ---- end
-
+      local ensure_installed = vim.tbl_keys(servers or {})
+      vim.list_extend(ensure_installed, {
+        -- You can add other tools here that you want Mason to install
+      })
 
       for i = #ensure_installed, 1, -1 do
-        if ensure_installed[i] == 'perlpls' then
-          table.remove(ensure_installed, i)
-        end
+        if ensure_installed[i] == 'perlpls' then table.remove(ensure_installed, i) end
       end
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -738,6 +730,11 @@ require('lazy').setup({
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_enable = true,
       }
+
+      ---- for name, server in pairs(servers) do
+      ----   vim.lsp.config(name, server)
+      ----   vim.lsp.enable(name)
+      ---- end
 
       vim.lsp.config('perlpls', servers['perlpls'])
       vim.lsp.enable 'perlpls'
@@ -751,7 +748,7 @@ require('lazy').setup({
     keys = {
       {
         '<leader>f',
-        function() require('conform').format { async = true, lsp_format = 'fallback' } end,
+        function() require('conform').format { async = true, lsp_format = vim.bo.filetype == 'lua' and 'never' or 'fallback' } end,
         mode = '',
         desc = '[F]ormat buffer',
       },
@@ -765,12 +762,13 @@ require('lazy').setup({
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
         local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
+        local ft = vim.bo[bufnr].filetype
+        if disable_filetypes[ft] then
           return nil
         else
           return {
             timeout_ms = 500,
-            lsp_format = 'fallback',
+            lsp_format = ft == 'lua' and 'never' or 'fallback',
           }
         end
       end,
@@ -808,9 +806,7 @@ require('lazy').setup({
           --    https://github.com/rafamadriz/friendly-snippets
           {
             'rafamadriz/friendly-snippets',
-            config = function()
-              require('luasnip.loaders.from_vscode').lazy_load()
-            end,
+            config = function() require('luasnip.loaders.from_vscode').lazy_load() end,
           },
         },
         opts = {},
