@@ -81,6 +81,9 @@ If you experience any errors while trying to install kickstart, run `:checkhealt
 I hope you enjoy your Neovim journey,
 - TJ
 
+Pre-requirements:
+    brew install tree-sitter tree-sitter-cli
+
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
