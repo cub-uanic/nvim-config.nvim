@@ -383,6 +383,12 @@ local function jump_with_restore(loc)
 end
 
 local function gf_or_tag()
+  -- in help buffers Enter must follow help tags, not gf/file lookup
+  if vim.bo.buftype == 'help' or vim.bo.filetype == 'help' then
+    vim.cmd [[execute "normal! \<C-]>" ]]
+    return
+  end
+
   -- LSP definition -> gf -> tag
   local params = vim.lsp.util.make_position_params(0, 'utf-8')
 
@@ -411,12 +417,25 @@ local function gf_or_tag()
   end
 
   -- tag fallback
-  vim.cmd 'normal! <C-]>'
+  vim.cmd [[execute "normal! \<C-]>" ]]
 end
 
 vim.api.nvim_create_user_command('UpdateTags', update_tags, {})
 vim.api.nvim_create_user_command('GFOrTag', gf_or_tag, {})
 vim.api.nvim_create_user_command('TagBackOrAlternate', tagback_or_alternate, {})
+
+-- global mappings
+vim.keymap.set('n', '<CR>', gf_or_tag, { silent = true })
+vim.keymap.set('n', '<BS>', tagback_or_alternate, { silent = true })
+
+-- help-local mappings
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'help',
+  callback = function(ev)
+    vim.keymap.set('n', '<CR>', '<C-]>', { buffer = ev.buf, silent = true })
+    vim.keymap.set('n', '<BS>', '<C-T>', { buffer = ev.buf, silent = true })
+  end,
+})
 
 -- ----------------------------------------------------------------------------
 -- Autocmds (из MyBufEnter + Syntax *)
@@ -856,10 +875,8 @@ map('n', '<CR>', gf_or_tag, 'LSP def -> gf -> tag')
 -- Ctrl-Up/Down: gk/gj (перемещение по экранным строкам)
 -- ORIGINAL (.vimrc): nmap <C-Up> gk ; nmap <C-Down> gj ; imap ... <C-O>gk/gj
 -- Без feedkeys мы делаем: stopinsert -> normal -> startinsert
-map('n', '<C-Up>', function() vim.cmd.normal { 'gk', bang = true } end, 'Вверх по экранным строкам')
-map('n', '<C-Down>', function() vim.cmd.normal { 'gj', bang = true } end, 'Вниз по экранным строкам')
-map('i', '<C-Up>', function() normal_anywhere('gk', true) end, 'Вверх по экранным строкам (insert)')
-map('i', '<C-Down>', function() normal_anywhere('gj', true) end, 'Вниз по экранным строкам (insert)')
+vim.keymap.set({ 'n', 'i' }, '<C-Up>', function() normal_anywhere('gk', true) end, { desc = 'Вверх по экранным строкам' })
+vim.keymap.set({ 'n', 'i' }, '<C-Down>', function() normal_anywhere('gj', true) end, { desc = 'Вниз по экранным строкам' })
 
 -- Mirror/Reverse visual
 -- ORIGINAL (.vimrc): vmap <Leader>m :Mirror<CR>
