@@ -1,5 +1,4 @@
 return {
-  "vim-perl/vim-perl",
-  ft = { "perl" },
+  'vim-perl/vim-perl',
+  ft = { 'perl' },
 }
-

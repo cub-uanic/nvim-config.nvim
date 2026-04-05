@@ -23,31 +23,23 @@ do
 
   local function reload(notify)
     local ok, mod = pcall(require, 'custom.db_project_dadbod')
-    if ok and mod then
-      mod.load_for_cwd { notify = notify }
-    end
+    if ok and mod then mod.load_for_cwd { notify = notify } end
   end
 
   -- Load on startup
   vim.api.nvim_create_autocmd('VimEnter', {
     group = group,
-    callback = function()
-      reload(false)
-    end,
+    callback = function() reload(false) end,
   })
 
   -- Reload when you change directory (e.g. opening another project)
   vim.api.nvim_create_autocmd('DirChanged', {
     group = group,
-    callback = function()
-      reload(false)
-    end,
+    callback = function() reload(false) end,
   })
 
   -- Manual command
-  vim.api.nvim_create_user_command('DBProjectReload', function()
-    reload(true)
-  end, {})
+  vim.api.nvim_create_user_command('DBProjectReload', function() reload(true) end, {})
 end
 
 -- ============================================================================

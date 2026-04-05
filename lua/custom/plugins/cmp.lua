@@ -57,9 +57,7 @@ return {
           local bufs = {}
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local b = vim.api.nvim_win_get_buf(win)
-            if vim.bo[b].buftype == '' then
-              bufs[b] = true
-            end
+            if vim.bo[b].buftype == '' then bufs[b] = true end
           end
           local res = {}
           for b, _ in pairs(bufs) do
@@ -81,9 +79,7 @@ return {
       end
     end
 
-    if not has_buffer then
-      table.insert(opts.sources, 1, buffer_source)
-    end
+    if not has_buffer then table.insert(opts.sources, 1, buffer_source) end
 
     --------------------------------------------------------------------------
     -- SQL: prioritize buffer; limit dadbod items; include path

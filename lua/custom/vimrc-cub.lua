@@ -89,13 +89,9 @@ vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufReadPost' }, {
   group = cbd,
   callback = function()
     -- не трогаем special буферы: lazy, help, telescope, terminal и т.п.
-    if vim.bo.buftype ~= '' then
-      return
-    end
+    if vim.bo.buftype ~= '' then return end
     -- если вдруг буфер немодифицируемый — тоже не трогаем
-    if not vim.bo.modifiable then
-      return
-    end
+    if not vim.bo.modifiable then return end
 
     -- табы/инденты (buffer-local)
     vim.bo.tabstop = 4
@@ -231,9 +227,7 @@ end
 
 local function t_builtin()
   local ok, b = pcall(require, 'telescope.builtin')
-  if ok then
-    return b
-  end
+  if ok then return b end
   return nil
 end
 
@@ -242,28 +236,18 @@ local function ensure_parent_dir_for_current_buffer()
   local fname = vim.api.nvim_buf_get_name(buf)
 
   -- No name / special buffers
-  if fname == nil or fname == '' then
-    return true
-  end
+  if fname == nil or fname == '' then return true end
   -- Don't try to create dirs for non-file buffers (netrw, fugitive, etc.)
-  if fname:match '^%a+://' then
-    return true
-  end
+  if fname:match '^%a+://' then return true end
 
   local dir = vim.fn.fnamemodify(fname, ':h')
-  if dir == nil or dir == '' or dir == '.' then
-    return true
-  end
+  if dir == nil or dir == '' or dir == '.' then return true end
 
-  if vim.fn.isdirectory(dir) == 1 then
-    return true
-  end
+  if vim.fn.isdirectory(dir) == 1 then return true end
 
   local msg = ("Directory doesn't exist:\n%s\n\nCreate it (including parents)?"):format(dir)
   local choice = vim.fn.confirm(msg, '&Yes\n&No', 2)
-  if choice ~= 1 then
-    return false
-  end
+  if choice ~= 1 then return false end
 
   local ok, err = pcall(vim.fn.mkdir, dir, 'p')
   if not ok then
@@ -279,9 +263,7 @@ local function is_telescope_active()
     if vim.api.nvim_buf_is_loaded(buf) then
       local buf_type = vim.api.nvim_get_option_value('buftype', { buf = buf })
       local buf_name = vim.api.nvim_buf_get_name(buf)
-      if buf_type == 'prompt' or buf_name:match 'Telescope' then
-        return true
-      end
+      if buf_type == 'prompt' or buf_name:match 'Telescope' then return true end
     end
   end
   return false
@@ -290,20 +272,14 @@ end
 -- Выполнить Ex-команду и в Insert тоже:
 -- Мы сознательно не сохраняем Insert-mode (это требовало бы feedkeys).
 local function ex_anywhere(cmd)
-  if is_telescope_active() then
-    vim.api.nvim_win_close(0, true)
-  end
+  if is_telescope_active() then vim.api.nvim_win_close(0, true) end
 
   local lower = cmd:lower()
   if lower == 'w' or lower == 'write' or lower:match '^w%s' or lower:match '^write%s' then
-    if not ensure_parent_dir_for_current_buffer() then
-      return
-    end
+    if not ensure_parent_dir_for_current_buffer() then return end
   end
 
-  if vim.fn.mode():match '^i' then
-    vim.cmd 'stopinsert'
-  end
+  if vim.fn.mode():match '^i' then vim.cmd 'stopinsert' end
 
   vim.cmd(cmd)
 end
@@ -311,13 +287,9 @@ end
 -- Выполнить normal-команду; в Insert выходим и (если нужно) возвращаемся
 local function normal_anywhere(keys, return_to_insert)
   local was_insert = vim.fn.mode():match '^i' ~= nil
-  if was_insert then
-    vim.cmd 'stopinsert'
-  end
+  if was_insert then vim.cmd 'stopinsert' end
   vim.cmd.normal { keys, bang = true }
-  if was_insert and return_to_insert then
-    vim.cmd 'startinsert'
-  end
+  if was_insert and return_to_insert then vim.cmd 'startinsert' end
 end
 
 local function highlight_overlength(enable)
@@ -345,9 +317,7 @@ local function next_window()
   local cur = vim.fn.winnr()
   local last = vim.fn.winnr '$'
   local neww = cur + 1
-  if neww > last then
-    neww = 1
-  end
+  if neww > last then neww = 1 end
   vim.cmd(('silent %dwincmd w'):format(neww))
 end
 
@@ -355,9 +325,7 @@ local function prev_window()
   local cur = vim.fn.winnr()
   local last = vim.fn.winnr '$'
   local neww = cur - 1
-  if neww < 1 then
-    neww = last
-  end
+  if neww < 1 then neww = last end
   vim.cmd(('silent %dwincmd w'):format(neww))
 end
 
@@ -385,31 +353,23 @@ local last_positions = {}
 vim.api.nvim_create_autocmd('BufLeave', {
   callback = function(args)
     local bufnr = args.buf
-    if vim.api.nvim_buf_is_loaded(bufnr) then
-      last_positions[bufnr] = vim.api.nvim_win_get_cursor(0)
-    end
+    if vim.api.nvim_buf_is_loaded(bufnr) then last_positions[bufnr] = vim.api.nvim_win_get_cursor(0) end
   end,
 })
 
 -- restore position if we have it saved
 local function restore_position(bufnr)
   local pos = last_positions[bufnr]
-  if not pos then
-    return
-  end
+  if not pos then return end
 
   local line_count = vim.api.nvim_buf_line_count(bufnr)
-  if pos[1] <= line_count then
-    vim.api.nvim_win_set_cursor(0, pos)
-  end
+  if pos[1] <= line_count then vim.api.nvim_win_set_cursor(0, pos) end
 end
 
 -- LSP jump wrapper with deterministic restore
 local function jump_with_restore(loc)
   local uri = loc.uri or loc.targetUri
-  if not uri then
-    return
-  end
+  if not uri then return end
 
   local bufnr = vim.uri_to_bufnr(uri)
   local already_loaded = vim.api.nvim_buf_is_loaded(bufnr)
@@ -419,11 +379,7 @@ local function jump_with_restore(loc)
 
   -- if buffer already existed, BufReadPost will NOT fire
   -- so we restore manually
-  if already_loaded then
-    vim.schedule(function()
-      restore_position(bufnr)
-    end)
-  end
+  if already_loaded then vim.schedule(function() restore_position(bufnr) end) end
 end
 
 local function gf_or_tag()
@@ -493,16 +449,12 @@ vim.api.nvim_create_autocmd({ 'BufEnter', 'FileType' }, {
 
 vim.api.nvim_create_autocmd('Syntax', {
   group = cvm,
-  callback = function()
-    add_tab_spaces_syntax()
-  end,
+  callback = function() add_tab_spaces_syntax() end,
 })
 
 vim.api.nvim_create_autocmd('BufWritePost', {
   group = cvm,
-  callback = function()
-    update_tags()
-  end,
+  callback = function() update_tags() end,
 })
 
 -- Perl buffer-local maps from vimrc
@@ -530,9 +482,7 @@ end
 
 local function luasnip_edit_current_ft()
   local ft = vim.bo.filetype
-  if not ft or ft == '' then
-    ft = 'all'
-  end
+  if not ft or ft == '' then ft = 'all' end
   open_luasnip_file(ft)
 end
 
@@ -595,9 +545,7 @@ do
 
       -- Ensure session can restore terminal splits too
       local so = vim.o.sessionoptions
-      if not so:match 'terminal' then
-        vim.o.sessionoptions = so .. ',terminal'
-      end
+      if not so:match 'terminal' then vim.o.sessionoptions = so .. ',terminal' end
 
       -- Write session for current state
       vim.cmd('silent! mksession! ' .. vim.fn.fnameescape(only_session))
@@ -623,24 +571,16 @@ do
 end
 
 -- ORIGINAL (.vimrc): nmap/imap <S-F1> :copen
-map_multi({ 'n', 'i' }, { '<S-F1>', '<F13>' }, function()
-  ex_anywhere 'copen'
-end, 'Quickfix: открыть')
+map_multi({ 'n', 'i' }, { '<S-F1>', '<F13>' }, function() ex_anywhere 'copen' end, 'Quickfix: открыть')
 
 -- ORIGINAL (.vimrc): nmap/imap <C-F1> :close
-map_multi({ 'n', 'i' }, { '<C-F1>', '<F25>' }, function()
-  ex_anywhere 'close'
-end, 'Окно: закрыть')
+map_multi({ 'n', 'i' }, { '<C-F1>', '<F25>' }, function() ex_anywhere 'close' end, 'Окно: закрыть')
 
 -- ORIGINAL (.vimrc): nmap/imap <F2> :w
-map({ 'n', 'i' }, '<F2>', function()
-  ex_anywhere 'write'
-end, 'Сохранить')
+map({ 'n', 'i' }, '<F2>', function() ex_anywhere 'write' end, 'Сохранить')
 
 -- ORIGINAL (.vimrc): nmap/imap <S-F2> :wa
-map_multi({ 'n', 'i' }, { '<S-F2>', '<F14>' }, function()
-  ex_anywhere 'wall'
-end, 'Сохранить все')
+map_multi({ 'n', 'i' }, { '<S-F2>', '<F14>' }, function() ex_anywhere 'wall' end, 'Сохранить все')
 
 -- UltiSnipsEdit -> LuaSnip edit file
 -- ORIGINAL (.vimrc):
@@ -658,69 +598,53 @@ map_multi('v', { '<C-F2>', '<F26>' }, function()
   luasnip_edit_current_ft()
 end, 'LuaSnip: открыть сниппеты (delete selection)')
 
-map_multi({ 'n', 'i' }, { '<C-F2>', '<F26>' }, function()
-  luasnip_edit_current_ft()
-end, 'LuaSnip: открыть сниппеты для текущего ft')
+map_multi({ 'n', 'i' }, { '<C-F2>', '<F26>' }, function() luasnip_edit_current_ft() end, 'LuaSnip: открыть сниппеты для текущего ft')
 
 -- Utl plugin — не переносим
 -- ORIGINAL (.vimrc): map/imap <F3> :Utl
 -- (плагина нет в kickstart)
 
 -- ORIGINAL (.vimrc): nmap/imap <S-F3> :call TogilleBOM()
-map_multi({ 'n', 'i' }, { '<S-F3>', '<F15>' }, function()
-  vim.bo.bomb = not vim.bo.bomb
-end, 'Переключить BOM')
+map_multi({ 'n', 'i' }, { '<S-F3>', '<F15>' }, function() vim.bo.bomb = not vim.bo.bomb end, 'Переключить BOM')
 
 -- ORIGINAL (.vimrc): nmap/imap <C-F3> :set list!
-map_multi({ 'n', 'i' }, { '<C-F3>', '<F27>' }, function()
-  vim.opt.list = not vim.opt.list:get()
-end, 'Listchars: on/off')
+map_multi({ 'n', 'i' }, { '<C-F3>', '<F27>' }, function() vim.opt.list = not vim.opt.list:get() end, 'Listchars: on/off')
 
 -- TagList -> Telescope symbols/tags
 -- ORIGINAL (.vimrc): nmap/imap <F4> :TlistOpen
 map({ 'n', 'i' }, '<F4>', function()
   local b = t_builtin()
-  if b then
-    b.lsp_document_symbols()
-  end
+  if b then b.lsp_document_symbols() end
 end, 'Symbols: document (Telescope вместо TagList)')
 
 -- ORIGINAL (.vimrc): nmap/imap <S-F4> :TlistToggle
 map_multi({ 'n', 'i' }, { '<S-F4>', '<F16>' }, function()
   local b = t_builtin()
-  if b then
-    b.tags()
-  end
+  if b then b.tags() end
 end, 'Tags (ctags) (Telescope)')
 
 -- BufExplorer -> Telescope buffers
 -- ORIGINAL (.vimrc): nmap/imap <F5> :BufExplorer
 map({ 'n', 'i' }, '<F5>', function()
   local b = t_builtin()
-  if b then
-    b.oldfiles {
-      cwd_only = true,
-      previewer = false,
-    }
-  end
+  if b then b.oldfiles {
+    cwd_only = true,
+    previewer = false,
+  } end
 end, 'Buffers (Telescope)')
 
 -- fugitive :Gblame -> gitsigns blame (visual F5)
 -- ORIGINAL (.vimrc): vmap <F5> :Gblame
 map('v', '<F5>', function()
   local ok, gs = pcall(require, 'gitsigns')
-  if ok then
-    gs.blame_line { full = true }
-  end
+  if ok then gs.blame_line { full = true } end
 end, 'Git blame (gitsigns)')
 
 -- MultipleSearch -> Telescope current buffer + reset
 -- ORIGINAL (.vimrc): nmap/imap <C-F5> :Search
 map_multi({ 'n', 'i' }, { '<C-F5>', '<F29>' }, function()
   local b = t_builtin()
-  if b then
-    b.current_buffer_fuzzy_find()
-  end
+  if b then b.current_buffer_fuzzy_find() end
 end, 'Search in buffer (Telescope)')
 
 -- ORIGINAL (.vimrc): nmap/imap <S-F5> :SearchReset
@@ -733,62 +657,42 @@ end, 'SearchReset (очистить поиск + nohl)')
 -- ORIGINAL (.vimrc): nmap/imap <F6> :Buffers
 map({ 'n', 'i' }, '<F6>', function()
   local b = t_builtin()
-  if b then
-    b.buffers()
-  end
+  if b then b.buffers() end
 end, 'Telescope: buffers')
 
 -- ORIGINAL (.vimrc): nmap/imap <S-F6> :Tags
 map_multi({ 'n', 'i' }, { '<S-F6>', '<F18>' }, function()
   local b = t_builtin()
-  if b then
-    b.tags()
-  end
+  if b then b.tags() end
 end, 'Telescope: tags')
 
 -- ORIGINAL (.vimrc): nmap/imap <C-F6> :e#
-map_multi({ 'n', 'i' }, { '<C-F6>', '<F30>' }, function()
-  ex_anywhere 'edit #'
-end, 'Предыдущий файл (e#)')
+map_multi({ 'n', 'i' }, { '<C-F6>', '<F30>' }, function() ex_anywhere 'edit #' end, 'Предыдущий файл (e#)')
 
 -- ORIGINAL (.vimrc): nmap/imap <F7> NextWindow
-map({ 'n', 'i' }, '<F7>', function()
-  next_window()
-end, 'Окна: следующее (циклом)')
+map({ 'n', 'i' }, '<F7>', function() next_window() end, 'Окна: следующее (циклом)')
 
 -- ORIGINAL (.vimrc): nmap/imap <F8> PrevWindow
-map({ 'n', 'i' }, '<F8>', function()
-  prev_window()
-end, 'Окна: предыдущее (циклом)')
+map({ 'n', 'i' }, '<F8>', function() prev_window() end, 'Окна: предыдущее (циклом)')
 
 -- ORIGINAL (.vimrc): map/imap <C-F7> :cp
-map_multi({ 'n', 'i' }, { '<C-F7>', '<F31>' }, function()
-  ex_anywhere 'cp'
-end, 'Quickfix: prev')
+map_multi({ 'n', 'i' }, { '<C-F7>', '<F31>' }, function() ex_anywhere 'cp' end, 'Quickfix: prev')
 
 -- ORIGINAL (.vimrc): map/imap <C-F8> :cn
-map_multi({ 'n', 'i' }, { '<C-F8>', '<F32>' }, function()
-  ex_anywhere 'cn'
-end, 'Quickfix: next')
+map_multi({ 'n', 'i' }, { '<C-F8>', '<F32>' }, function() ex_anywhere 'cn' end, 'Quickfix: next')
 
 -- ORIGINAL (.vimrc): map/imap <S-F7> :bp
-map_multi({ 'n', 'i' }, { '<S-F7>', '<F19>' }, function()
-  ex_anywhere 'bp'
-end, 'Буфер: предыдущий')
+map_multi({ 'n', 'i' }, { '<S-F7>', '<F19>' }, function() ex_anywhere 'bp' end, 'Буфер: предыдущий')
 
 -- ORIGINAL (.vimrc): map/imap <S-F8> :bn
-map_multi({ 'n', 'i' }, { '<S-F8>', '<F20>' }, function()
-  ex_anywhere 'bn'
-end, 'Буфер: следующий')
+map_multi({ 'n', 'i' }, { '<S-F8>', '<F20>' }, function() ex_anywhere 'bn' end, 'Буфер: следующий')
 
 -- F9 / S-F9 / C-F9 “естественно” для nvim:
 -- F9 -> formatter (conform/perltidy)
 -- S-F9 -> linter (nvim-lint/perlcritic)
 -- C-F9 -> format + save + buffers
 map({ 'n', 'i' }, '<F9>', function()
-  if vim.fn.mode():match '^i' then
-    vim.cmd 'stopinsert'
-  end
+  if vim.fn.mode():match '^i' then vim.cmd 'stopinsert' end
   local ok, conform = pcall(require, 'conform')
   if ok then
     conform.format { async = false, lsp_fallback = true }
@@ -805,64 +709,44 @@ end, 'Format (conform/perltidy)')
 -- end, "Lint (nvim-lint/perlcritic)")
 
 map_multi({ 'n', 'i' }, { '<C-F9>', '<F33>' }, function()
-  if vim.fn.mode():match '^i' then
-    vim.cmd 'stopinsert'
-  end
+  if vim.fn.mode():match '^i' then vim.cmd 'stopinsert' end
   local ok, conform = pcall(require, 'conform')
-  if ok then
-    conform.format { async = false, lsp_fallback = true }
-  end
+  if ok then conform.format { async = false, lsp_fallback = true } end
   vim.cmd 'write'
   local b = t_builtin()
-  if b then
-    b.buffers()
-  end
+  if b then b.buffers() end
 end, 'Format + save + buffers')
 
 -- ORIGINAL (.vimrc): nmap/imap <F10> :qa
-map({ 'n', 'i' }, '<F10>', function()
-  ex_anywhere 'qa'
-end, 'Выйти', { noremap = true })
+map({ 'n', 'i' }, '<F10>', function() ex_anywhere 'qa' end, 'Выйти', { noremap = true })
 
 -- ORIGINAL (.vimrc): nmap/imap <S-F10> :wqa
-map_multi({ 'n', 'i' }, { '<S-F10>', '<F22>' }, function()
-  ex_anywhere 'wqa'
-end, 'Сохранить и выйти')
+map_multi({ 'n', 'i' }, { '<S-F10>', '<F22>' }, function() ex_anywhere 'wqa' end, 'Сохранить и выйти')
 
 -- ORIGINAL (.vimrc): nmap/imap <C-F10> :qa!
-map_multi({ 'n', 'i' }, { '<C-F10>', '<F34>' }, function()
-  ex_anywhere 'qa!'
-end, 'Выйти без сохранения')
+map_multi({ 'n', 'i' }, { '<C-F10>', '<F34>' }, function() ex_anywhere 'qa!' end, 'Выйти без сохранения')
 
 -- SessionOpen -> persistence
 -- ORIGINAL (.vimrc): nmap <S-F11> :SessionOpen elc
 -- ORIGINAL (.vimrc): nmap <S-F12> :SessionOpen default
 map_multi('n', { '<S-F11>', '<F23>' }, function()
   local ok, p = pcall(require, 'persistence')
-  if ok then
-    p.load()
-  end
+  if ok then p.load() end
 end, 'Session: load (persistence)')
 
 map_multi('n', { '<S-F12>', '<F24>' }, function()
   local ok, p = pcall(require, 'persistence')
-  if ok then
-    p.select()
-  end
+  if ok then p.select() end
 end, 'Session: select (persistence)')
 
 -- UpdateTags
 -- ORIGINAL (.vimrc): nmap/imap <C-F12> :call UpdateTags()
-map_multi({ 'n', 'i' }, { '<C-F12>', '<F36>' }, function()
-  update_tags()
-end, 'UpdateTags')
+map_multi({ 'n', 'i' }, { '<C-F12>', '<F36>' }, function() update_tags() end, 'UpdateTags')
 -- raw-seq убран: нужен только если терминал не умеет <C-F12> (у тебя сейчас клавиши норм приходят)
 
 -- VNC workaround
 -- ORIGINAL (.vimrc): nmap/imap <F12> :qa
-map({ 'n', 'i' }, '<F12>', function()
-  ex_anywhere 'qa'
-end, 'Выйти (F12, как в vimrc для VNC)')
+map({ 'n', 'i' }, '<F12>', function() ex_anywhere 'qa' end, 'Выйти (F12, как в vimrc для VNC)')
 
 -- ========== Alt+Arrows window resize ==========
 -- ORIGINAL (.vimrc): map <A-Up>/<A-Down>/<A-Left>/<A-Right> <C-W>-/+/</>
@@ -876,9 +760,7 @@ map('n', '<A-Right>', '<C-w>>', 'Окно: больше ширина')
 -- NERDTreeToggle заменяем на “идеологичный” toggle: neo-tree/oil/Ex
 -- ORIGINAL (.vimrc): nmap/imap <C-G> :NERDTreeToggle
 map({ 'n', 'i' }, '<C-G>', function()
-  if vim.fn.mode():match '^i' then
-    vim.cmd 'stopinsert'
-  end
+  if vim.fn.mode():match '^i' then vim.cmd 'stopinsert' end
 
   local ok_neotree, neotree = pcall(require, 'neo-tree.command')
   if ok_neotree then
@@ -901,61 +783,39 @@ end, 'File tree toggle (neo-tree/oil/Ex)')
 -- Мы делаем это через vim.cmd.normal() (без feedkeys).
 -- workman-based -> Y/K works with reg J, N/L with reg F
 -- ORIGINAL (.vimrc): nmap/vmap/imap <C-Y> "fy
-map('n', '<C-Y>', function()
-  vim.cmd.normal { [["jy]], bang = true }
-end, 'Yank -> регистр "j"')
-map('v', '<C-Y>', function()
-  vim.cmd.normal { [["jy]], bang = true }
-end, 'Yank -> регистр "j" (visual)')
-map('i', '<C-Y>', function()
-  normal_anywhere([["jy]], true)
-end, 'Yank -> регистр "j" (insert)')
+map('n', '<C-Y>', function() vim.cmd.normal { [["jy]], bang = true } end, 'Yank -> регистр "j"')
+map('v', '<C-Y>', function() vim.cmd.normal { [["jy]], bang = true } end, 'Yank -> регистр "j" (visual)')
+map('i', '<C-Y>', function() normal_anywhere([["jy]], true) end, 'Yank -> регистр "j" (insert)')
 
 -- ORIGINAL (.vimrc): nmap/imap <C-K> "fP
 map('n', '<C-K>', function()
-  if vim.fn.getreg 'j' == '' then
-    return
-  end
+  if vim.fn.getreg 'j' == '' then return end
   vim.cmd.normal { [["jP]], bang = true }
 end, 'Paste(before) из регистра "j"')
 map('i', '<C-K>', function()
-  if vim.fn.getreg 'j' == '' then
-    return
-  end
+  if vim.fn.getreg 'j' == '' then return end
   normal_anywhere([["jP]], true)
 end, 'Paste(before) из регистра "j" (insert)')
 
 -- ORIGINAL (.vimrc): nmap/vmap/imap <C-N> "uy
-map('n', '<C-N>', function()
-  vim.cmd.normal { [["fy]], bang = true }
-end, 'Yank -> регистр "f"')
-map('v', '<C-N>', function()
-  vim.cmd.normal { [["fy]], bang = true }
-end, 'Yank -> регистр "f" (visual)')
-map('i', '<C-N>', function()
-  normal_anywhere([["fy]], true)
-end, 'Yank -> регистр "f" (insert)')
+map('n', '<C-N>', function() vim.cmd.normal { [["fy]], bang = true } end, 'Yank -> регистр "f"')
+map('v', '<C-N>', function() vim.cmd.normal { [["fy]], bang = true } end, 'Yank -> регистр "f" (visual)')
+map('i', '<C-N>', function() normal_anywhere([["fy]], true) end, 'Yank -> регистр "f" (insert)')
 
 -- ORIGINAL (.vimrc): nmap/imap <C-L> "uP
 map('n', '<C-L>', function()
-  if vim.fn.getreg 'f' == '' then
-    return
-  end
+  if vim.fn.getreg 'f' == '' then return end
   vim.cmd.normal { [["fP]], bang = true }
 end, 'Paste(before) из регистра "f"')
 map('i', '<C-L>', function()
-  if vim.fn.getreg 'f' == '' then
-    return
-  end
+  if vim.fn.getreg 'f' == '' then return end
   normal_anywhere([["fP]], true)
 end, 'Paste(before) из регистра "f" (insert)')
 
 -- C-* : FufTagWithCursorWord (плагина нет) -> Telescope tags с подстановкой слова или LSP def
 -- ORIGINAL (.vimrc): nmap/imap <C-*> :FufTagWithCursorWord
 map({ 'n', 'i' }, '<C-*>', function()
-  if vim.fn.mode():match '^i' then
-    vim.cmd 'stopinsert'
-  end
+  if vim.fn.mode():match '^i' then vim.cmd 'stopinsert' end
   local b = t_builtin()
   if b then
     b.tags { default_text = vim.fn.expand '<cword>' }
@@ -966,16 +826,12 @@ end, 'Tag with cursor word (Telescope/LSP)')
 
 vim.keymap.set('n', '<leader>gl', function()
   local b = t_builtin()
-  if b then
-    b.live_grep { default_text = vim.fn.expand '<cword>' }
-  end
+  if b then b.live_grep { default_text = vim.fn.expand '<cword>' } end
 end, { desc = 'live_grep current word' })
 
 vim.keymap.set('v', '<leader>sw', function()
   local b = t_builtin()
-  if b then
-    b.grep_string { search = vim.fn.getreg '/' }
-  end
+  if b then b.grep_string { search = vim.fn.getreg '/' } end
 end, { desc = 'grep visual selection' })
 
 vim.keymap.set('n', '<leader>et', function()
@@ -1000,18 +856,10 @@ map('n', '<CR>', gf_or_tag, 'LSP def -> gf -> tag')
 -- Ctrl-Up/Down: gk/gj (перемещение по экранным строкам)
 -- ORIGINAL (.vimrc): nmap <C-Up> gk ; nmap <C-Down> gj ; imap ... <C-O>gk/gj
 -- Без feedkeys мы делаем: stopinsert -> normal -> startinsert
-map('n', '<C-Up>', function()
-  vim.cmd.normal { 'gk', bang = true }
-end, 'Вверх по экранным строкам')
-map('n', '<C-Down>', function()
-  vim.cmd.normal { 'gj', bang = true }
-end, 'Вниз по экранным строкам')
-map('i', '<C-Up>', function()
-  normal_anywhere('gk', true)
-end, 'Вверх по экранным строкам (insert)')
-map('i', '<C-Down>', function()
-  normal_anywhere('gj', true)
-end, 'Вниз по экранным строкам (insert)')
+map('n', '<C-Up>', function() vim.cmd.normal { 'gk', bang = true } end, 'Вверх по экранным строкам')
+map('n', '<C-Down>', function() vim.cmd.normal { 'gj', bang = true } end, 'Вниз по экранным строкам')
+map('i', '<C-Up>', function() normal_anywhere('gk', true) end, 'Вверх по экранным строкам (insert)')
+map('i', '<C-Down>', function() normal_anywhere('gj', true) end, 'Вниз по экранным строкам (insert)')
 
 -- Mirror/Reverse visual
 -- ORIGINAL (.vimrc): vmap <Leader>m :Mirror<CR>
@@ -1025,12 +873,8 @@ map('n', '<Bslash><Bslash>', '<cmd>nohlsearch<CR>', 'Убрать подсвет
 
 -- OverLength
 -- ORIGINAL (.vimrc): nmap <Leader>y ... yes ; nmap <Leader>n ... no
-map('n', '<Leader>y', function()
-  highlight_overlength(true)
-end, 'OverLength: ON')
-map('n', '<Leader>n', function()
-  highlight_overlength(false)
-end, 'OverLength: OFF')
+map('n', '<Leader>y', function() highlight_overlength(true) end, 'OverLength: ON')
+map('n', '<Leader>n', function() highlight_overlength(false) end, 'OverLength: OFF')
 
 -- Marks shortcuts (Tab-f/u/p/$ and jumps) — оставляем как было
 -- ORIGINAL (.vimrc): nmap <Tab>f mF ... etc
@@ -1054,9 +898,7 @@ map('v', '<S-Tab>', '<gv', 'Indent: блок влево (S-Tab)')
 
 -- Registers list ("" )
 -- ORIGINAL (.vimrc): nnoremap "" :registers "0123456789abcdefghijklmnopqrstuvwxyz*+.<CR>
-map('n', [[""]], function()
-  vim.cmd [[registers "0123456789abcdefghijklmnopqrstuvwxyz*+.]]
-end, 'Показать регистры')
+map('n', [[""]], function() vim.cmd [[registers "0123456789abcdefghijklmnopqrstuvwxyz*+.]] end, 'Показать регистры')
 
 -- Русская “№” -> “#”
 -- ORIGINAL (.vimrc): imap № #
@@ -1067,23 +909,17 @@ end, 'Показать регистры')
 -- ----------------------------------------------------------------------------
 map('n', '<Leader>ps', function()
   local ok, p = pcall(require, 'persistence')
-  if ok then
-    p.save()
-  end
+  if ok then p.save() end
 end, 'Session: save')
 
 map('n', '<Leader>pl', function()
   local ok, p = pcall(require, 'persistence')
-  if ok then
-    p.load()
-  end
+  if ok then p.load() end
 end, 'Session: load')
 
 map('n', '<Leader>pc', function()
   local ok, p = pcall(require, 'persistence')
-  if ok then
-    p.select()
-  end
+  if ok then p.select() end
 end, 'Session: choose')
 
 -- vim: ts=2 sts=2 sw=2 et

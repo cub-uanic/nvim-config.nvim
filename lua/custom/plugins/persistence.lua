@@ -10,36 +10,26 @@ return {
   },
   config = function(_, opts)
     local ok, persistence = pcall(require, 'persistence')
-    if not ok then
-      return
-    end
+    if not ok then return end
     persistence.setup(opts)
 
     local group = vim.api.nvim_create_augroup('CustomPersistence', { clear = true })
 
     local function should_autoload()
       -- если передали файлы аргументами — не лезем с сессией
-      if vim.fn.argc() ~= 0 then
-        return false
-      end
+      if vim.fn.argc() ~= 0 then return false end
 
       -- если nvim стартанул, читая из stdin (например: cat file | nvim -)
       -- в этом случае тоже не надо грузить сессию
-      if vim.fn.exists 'g:started_with_stdin' == 1 and vim.g.started_with_stdin then
-        return false
-      end
+      if vim.fn.exists 'g:started_with_stdin' == 1 and vim.g.started_with_stdin then return false end
 
-      if vim.o.diff then
-        return false
-      end
+      if vim.o.diff then return false end
 
       return true
     end
 
     local function autoload()
-      if not should_autoload() then
-        return
-      end
+      if not should_autoload() then return end
 
       -- ВАЖНО: делаем после старта, чтобы не конфликтовать с UI/плагинами
       vim.schedule(function()

@@ -21,56 +21,38 @@ return {
     -- ---------------------------------------------------------------------
     -- helpers
     -- ---------------------------------------------------------------------
-    local function notify(msg, level)
-      vim.notify(msg, level or vim.log.levels.INFO)
-    end
+    local function notify(msg, level) vim.notify(msg, level or vim.log.levels.INFO) end
 
     local function buf_abs_path()
       local file = vim.api.nvim_buf_get_name(0)
-      if not file or file == '' then
-        return nil
-      end
+      if not file or file == '' then return nil end
       return file
     end
 
-    local function is_readable(file)
-      return file and vim.fn.filereadable(file) == 1
-    end
+    local function is_readable(file) return file and vim.fn.filereadable(file) == 1 end
 
-    local function exists(path)
-      return vim.fn.filereadable(path) == 1 or vim.fn.isdirectory(path) == 1
-    end
+    local function exists(path) return vim.fn.filereadable(path) == 1 or vim.fn.isdirectory(path) == 1 end
 
-    local function joinpath(...)
-      return table.concat({ ... }, '/')
-    end
+    local function joinpath(...) return table.concat({ ... }, '/') end
 
-    local function dirname(p)
-      return vim.fs.dirname(p)
-    end
+    local function dirname(p) return vim.fs.dirname(p) end
 
     local function find_project_root(start_dir)
       local markers = { '.git', 'cpanfile', 'Makefile.PL', 'dist.ini' }
       local found = vim.fs.find(markers, { upward = true, path = start_dir })[1]
-      if found then
-        return dirname(found)
-      end
+      if found then return dirname(found) end
       return start_dir
     end
 
     local function glob_one(pattern)
       local res = vim.fn.glob(pattern, false, true)
-      if type(res) == 'table' and #res > 0 then
-        return res[1]
-      end
+      if type(res) == 'table' and #res > 0 then return res[1] end
       return nil
     end
 
     local function glob_all(pattern)
       local res = vim.fn.glob(pattern, false, true)
-      if type(res) == 'table' then
-        return res
-      end
+      if type(res) == 'table' then return res end
       return {}
     end
 
@@ -83,17 +65,11 @@ return {
     end
 
     local function is_perl_like(file, bufnr)
-      if file:match '%.p[lm]$' or file:match '%.t$' or file:match '%.psgi$' then
-        return true
-      end
+      if file:match '%.p[lm]$' or file:match '%.t$' or file:match '%.psgi$' then return true end
       local ft = vim.bo[bufnr].filetype
-      if ft == 'perl' then
-        return true
-      end
+      if ft == 'perl' then return true end
       local first = vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1] or ''
-      if first:match '^#!' and (first:match 'perl' or first:match 'env%s+perl') then
-        return true
-      end
+      if first:match '^#!' and (first:match 'perl' or first:match 'env%s+perl') then return true end
       return false
     end
 
@@ -104,9 +80,7 @@ return {
         return
       end
 
-      if not ensure_cmd(spec.cmd[1]) then
-        return
-      end
+      if not ensure_cmd(spec.cmd[1]) then return end
 
       local task = overseer.new_task {
         name = spec.name,
@@ -150,9 +124,7 @@ return {
       local lines = vim.api.nvim_buf_get_lines(bufnr, 0, max_lines, false)
       local text = table.concat(lines, '\n')
 
-      if text:match '[\r\n]%s*use%s+Catalyst[%s;]' or text:match '^%s*use%s+Catalyst[%s;]' then
-        return 'catalyst'
-      end
+      if text:match '[\r\n]%s*use%s+Catalyst[%s;]' or text:match '^%s*use%s+Catalyst[%s;]' then return 'catalyst' end
 
       if
         text:match '[\r\n]%s*use%s+Mojolicious[%s;]'
@@ -167,9 +139,7 @@ return {
         return 'mojo'
       end
 
-      if text:match '[\r\n]%s*use%s+Dancer2?[%s;]' or text:match '^%s*use%s+Dancer2?[%s;]' then
-        return 'dancer'
-      end
+      if text:match '[\r\n]%s*use%s+Dancer2?[%s;]' or text:match '^%s*use%s+Dancer2?[%s;]' then return 'dancer' end
 
       if
         text:match '[\r\n]%s*use%s+Test2?::[%w:]+[%s;]'
@@ -239,9 +209,7 @@ return {
           break
         end
       end
-      if not dancer_entry then
-        dancer_entry = glob_one(joinpath(root, 'bin', '*.psgi')) or glob_one(joinpath(root, 'script', '*.psgi'))
-      end
+      if not dancer_entry then dancer_entry = glob_one(joinpath(root, 'bin', '*.psgi')) or glob_one(joinpath(root, 'script', '*.psgi')) end
       local is_dancer = dancer_entry ~= nil
 
       -- Catalyst: script/*_server.pl
@@ -297,9 +265,7 @@ return {
       -- PSGI / Plack -------------------------------------------------------
       if kind == 'psgi' or fb.is_psgi then
         local target = file
-        if (not fb.is_psgi) and fb.dancer_entry then
-          target = fb.dancer_entry
-        end
+        if (not fb.is_psgi) and fb.dancer_entry then target = fb.dancer_entry end
 
         run_overseer {
           name = 'plackup: ' .. vim.fn.fnamemodify(target, ':t'),
