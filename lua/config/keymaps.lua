@@ -2,18 +2,20 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
-local function map(modes, keys, action, desc, local_buf_only)
-  if type(keys) ~= "table" then keys = { keys } end
+---@diagnostic disable-next-line: undefined-global
+local vim = vim
 
-  local opts = { silent = true, desc = desc }
-  if local_buf_only then opts.buffer = 0 end
+local function map(modes, keys, action, desc, extopt)
+  if type(keys) ~= "table" then keys = { keys } end
+  local opts = vim.tbl_extend("force", { silent = true, desc = desc }, extopt or {})
 
   for _, key in ipairs(keys) do
     vim.keymap.set(modes, key, action, opts)
   end
 end
 
-local function bufmap(modes, keys, action, desc) map(modes, keys, action, desc, true) end
+local function bufmap(modes, keys, action, desc) map(modes, keys, action, desc, { buffer = 0 }) end
+local function remap(modes, keys, action, desc) map(modes, keys, action, desc, { remap = true }) end
 
 local function plugin(plug)
   plug = plug or "telescope.builtin"
@@ -289,6 +291,10 @@ vim.api.nvim_create_autocmd("TermOpen", {
     end
   end,
 })
+
+-- Remap for Workman
+remap({ "n", "i", "v" }, "<A-e>", "<A-k>", "Move Up")
+remap({ "n", "i", "v" }, "<A-o>", "<A-j>", "Move Down")
 
 -- F1
 map({ "n", "i" }, "<F1>", cmd_only, "Leave only this")
