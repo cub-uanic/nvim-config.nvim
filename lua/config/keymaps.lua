@@ -382,16 +382,14 @@ map("v", "<", "<gv", "Indent block left")
 map("v", "<Tab>", ">gv", "Indent block right")
 map("v", "<S-Tab>", "<gv", "Indent block left")
 
--- load last session
-vim.schedule(function()
-  local ok, persistence = pcall(require, "persistence")
-  if ok and vim.fn.argc() == 0 then persistence.load() end
-end)
+-- useful mappings from the internet
+
+-- move text bloks
+map("v", "J", ":m '>+1<CR>gv=gv")
+map("v", "K", ":m '<-2<CR>gv=gv")
 
 --[[
 TODO: implement IDEA-like mappings
-
-
 
  Group / Feature                              | Used   | Hotkey (macOS IDEA) | Overwrite (IDEA keymap)  | LazyVim Command                            | Hotkey (LazyVim)              | Implementation
  -------------------------------------------- | ------ | ------------------- | ------------------------ | ------------------------------------------ | ----------------------------- | --------------
@@ -449,10 +447,15 @@ TODO: implement IDEA-like mappings
  -------------------------------------------- | ------ | ------------------- | ------------------------ | ------------------------------------------ | ----------------------------- | --------------
  Group / Feature                              | Used   | Hotkey (macOS IDEA) | Overwrite (IDEA keymap)  | LazyVim Command                            | Hotkey (LazyVim)              | 
 
-
 --]]
 
 local function cmd_c_tab() tele_b().buffers { sort_mru = true, ignore_current_buffer = true } end
 map("n", "<C-Tab>", cmd_c_tab, "Navigation / Switcher")
+
+-- load last session
+vim.schedule(function()
+  local ok, persistence = pcall(require, "persistence")
+  if ok and vim.fn.argc() == 0 then persistence.load() end
+end)
 
 -- vim: ts=2 sts=2 sw=2 et

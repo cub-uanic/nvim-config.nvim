@@ -3,6 +3,9 @@ return {
   { "folke/persistence.nvim", event = "BufReadPre", opts = { need = 0 } },
   { "akinsho/bufferline.nvim", enabled = false },
 
+  { "EdenEast/nightfox.nvim" },
+  { "rose-pine/neovim" },
+
   {
     "nvim-mini/mini.hipatterns",
     opts = {
