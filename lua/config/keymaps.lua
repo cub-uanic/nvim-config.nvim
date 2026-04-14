@@ -240,6 +240,7 @@ local function cmd_lg_cword() LazyVim.pick("live_grep", { default_text = vim.fn.
 local function cmd_security_file() vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.stdpath "state" .. "/trust")) end
 local function cmd_yank_to_system() vim.fn.setreg("+", vim.fn.getreg '"') end
 local function cmd_reset_search() exec "nohlsearch" end
+local function cmd_c_tab() tele_b().buffers { sort_mru = true, ignore_current_buffer = true } end
 
 --
 -- Hotkeys definitions
@@ -382,74 +383,68 @@ map("v", "<", "<gv", "Indent block left")
 map("v", "<Tab>", ">gv", "Indent block right")
 map("v", "<S-Tab>", "<gv", "Indent block left")
 
--- useful mappings from the internet
-
--- move text bloks
-map("v", "J", ":m '>+1<CR>gv=gv")
-map("v", "K", ":m '<-2<CR>gv=gv")
+-- TODO: implement IDEA-like mappings
 
 --[[
-TODO: implement IDEA-like mappings
 
- Group / Feature                              | Used   | Hotkey (macOS IDEA) | Overwrite (IDEA keymap)  | LazyVim Command                            | Hotkey (LazyVim)              | Implementation
- -------------------------------------------- | ------ | ------------------- | ------------------------ | ------------------------------------------ | ----------------------------- | --------------
- Navigation / Switcher                        | 36456  | Ctrl+Tab            | —                        | Buffers: list / switch                     | <leader>bb / <S-h> / <S-l>    | Ctrl+Tab
- Navigation / Go to declaration               | 35983  | Cmd+B               | —                        | LSP: go to definition                      | gd                            | Enter
- Code Editing / Syntax aware selection        | 15383  | Option+Up           | —                        | Treesitter incremental selection           | v → + / -                     | 
- Navigation / Recent files popup              | 9266   | Cmd+E               | —                        | Telescope: recent files                    | <leader>fr                    | 
- Code Completion / Replace By (lookup)        | 6911   | Tab                 | —                        | nvim-cmp: confirm completion               | <Tab>                         | 
- Code Completion / Variable name completion   | 6403   | Ctrl+Alt+Space      | —                        | nvim-cmp: LSP completion                   | <C-Space>                     | 
- Code Completion / Basic code completion      | 6287   | Ctrl+Space          | —                        | nvim-cmp: trigger completion               | <C-Space>                     | 
- Navigation / Search Everywhere               | 5672   | Double Shift        | Cmd+Space / Ctrl+Space   | Telescope: files / live grep               | <leader><leader> / <leader>sg | 
- UI Usability / Speed search in trees         | 3987   | (type to search)    | —                        | Telescope fuzzy search                     | (type after Telescope)        | 
- Code Assistants / Context actions            | 3819   | Option+Enter        | —                        | LSP: code actions                          | <leader>ca                    | 
- Refactoring / Rename                         | 2192   | Shift+F6            | —                        | LSP: rename symbol                         | <leader>rn                    | 
- Navigation / Go to implementation            | 2181   | Option+Cmd+B        | —                        | LSP: go to implementation                  | gI                            | 
- Navigation / Find                            | 1937   | Cmd+F               | —                        | / (buffer search)                          | /                             | 
- Code Assistants / Comment line               | 1924   | Cmd+/               | —                        | Toggle comment                             | gcc                           | 
- Code Editing / Reformat code                 | 1850   | Option+Cmd+L        | —                        | Format buffer                              | <leader>cf                    | 
- Navigation / File structure popup            | 1484   | Cmd+F12             | —                        | Symbols outline                            | <leader>ss                    | 
- Database / Execute SQL Statement             | 792    | Cmd+Enter           | —                        | ❌ vim-dadbod-ui                           | -                             | 
- Database / Database Table Editor             | 731    | —                   | —                        | ❌ vim-dadbod-ui                           | -                             | 
- Refactoring / Introduce Variable             | 652    | Option+Cmd+V        | —                        | ❌ refactoring.nvim                        | -                             | 
- Code Assistants / Highlight method throws    | 618    | —                   | —                        | ❌ (IDE inspection)                        | -                             | 
- Code Editing / Multiple carets               | 607    | Option+Click        | —                        | vim-visual-multi                           | <C-n>                         | 
- UI Usability / Open Project tool window      | 536    | Cmd+1               | Cmd+1                    | neo-tree                                   | <leader>e                     | 
- UI Usability / Hide tool window              | 517    | Shift+Esc           | —                        | Close buffer                               | <leader>bd                    | 
- Code Completion / CamelCase prefixes         | 419    | —                   | —                        | nvim-cmp                                   | auto                          | 
- Code Assistants / Quick Documentation popup  | 207    | F1                  | —                        | LSP hover                                  | K                             | 
- Navigation / Show inheritance hierarchy      | 178    | Ctrl+H              | Ctrl+H / Cmd+Alt+H       | ❌ lspsaga / aerial                        | -                             | 
- Refactoring / Introduce Variable (quick)     | 174    | —                   | —                        | ❌ refactoring.nvim                        | -                             | 
- Navigation / Find in files                   | 171    | Cmd+Shift+F         | —                        | Telescope live grep                        | <leader>sg                    | 
- Code Assistants / Quick Doc on navigation    | 165    | —                   | —                        | LSP hover                                  | K                             | 
- -------------------------------------------- | ------ | ------------------- | ------------------------ | ------------------------------------------ | ----------------------------- | --------------
- Group / Feature                              | Used   | Hotkey (macOS IDEA) | Overwrite (IDEA keymap)  | LazyVim Command                            | Hotkey (LazyVim)              | 
- -------------------------------------------- | ------ | ------------------- | ------------------------ | ------------------------------------------ | ----------------------------- | --------------
- UI / Bookmarks tool window                   | 0      | —                   | Cmd+2                    | ❌ (нет аналога)                           | -                             | 
- UI / Commit tool window                      | 0      | —                   | Cmd+0                    | LazyGit                                    | <leader>gg                    | 
- UI / Database tool window                    | 0      | —                   | Cmd+3                    | ❌ vim-dadbod-ui                           | -                             | 
- UI / Debug tool window                       | 0      | —                   | Cmd+5                    | dap-ui                                     | <leader>du                    | 
- UI / Run tool window                         | 0      | —                   | Cmd+4                    | dap / run                                  | <leader>dr                    | 
- UI / Services tool window                    | 0      | —                   | Cmd+8                    | ❌                                         | -                             | 
- UI / Structure tool window                   | 0      | —                   | Cmd+7                    | Symbols outline                            | <leader>ss                    | 
- UI / Problems tool window                    | 0      | —                   | Cmd+6                    | Diagnostics                                | <leader>xd                    | 
- UI / Project tool window                     | 0      | —                   | Cmd+1                    | neo-tree                                   | <leader>e                     | 
- Navigation / Search Everywhere               | 0      | Double Shift        | Cmd+Space / Ctrl+Space   | Telescope                                  | <leader><leader>              | 
- Editor / Delete line                         | 0      | Cmd+Backspace       | Cmd+Backspace            | delete line                                | dd                            | 
- Editor / Increase font size                  | 0      | —                   | Shift+Alt+=              | ❌                                         | -                             | 
- Editor / Decrease font size                  | 0      | —                   | Shift+Alt+-              | ❌                                         | -                             | 
- Editor / Reset font size                     | 0      | —                   | Shift+Alt+)              | ❌                                         | -                             | 
- Editor / Move paragraph forward              | 0      | —                   | Shift+Alt+]              | ❌                                         | -                             | 
- Editor / Move paragraph backward             | 0      | —                   | Shift+Alt+[              | ❌                                         | -                             | 
- VCS / Annotate (blame)                       | 0      | —                   | Ctrl+Shift+A             | gitsigns blame                             | <leader>gb                    | 
- Completion / Inline completion               | 0      | —                   | Shift+Alt+\              | ❌ (copilot-like)                          | -                             | 
- UI / Toggle distraction free mode            | 0      | —                   | Shift+Alt+\              | zen-mode                                   | <leader>uz                    | 
- -------------------------------------------- | ------ | ------------------- | ------------------------ | ------------------------------------------ | ----------------------------- | --------------
- Group / Feature                              | Used   | Hotkey (macOS IDEA) | Overwrite (IDEA keymap)  | LazyVim Command                            | Hotkey (LazyVim)              | 
+ Group / Feature                              | Used   | Hotkey (macOS IDEA) | Overwrite (IDEA keymap)    | LazyVim Command                            | Hotkey (LazyVim)              | Implementation
+ -------------------------------------------- | ------ | ------------------- | -------------------------- | ------------------------------------------ | ----------------------------- | --------------
+ Navigation / Switcher                        | 36456  | Ctrl+Tab            | —                          | Buffers: list / switch                     | <leader>bb / <S-h> / <S-l>    | Ctrl+Tab
+ Navigation / Go to declaration               | 35983  | Cmd+B               | —                          | LSP: go to definition                      | gd                            | Enter
+ Code Editing / Syntax aware selection        | 15383  | Option+Up           | —                          | Treesitter incremental selection           | v → + / -                     |
+ Navigation / Recent files popup              | 9266   | Cmd+E               | —                          | Telescope: recent files                    | <leader>fr                    |
+ Code Completion / Replace By (lookup)        | 6911   | Tab                 | —                          | nvim-cmp: confirm completion               | <Tab>                         |
+ Code Completion / Variable name completion   | 6403   | Ctrl+Alt+Space      | —                          | nvim-cmp: LSP completion                   | <C-Space>                     |
+ Code Completion / Basic code completion      | 6287   | Ctrl+Space          | —                          | nvim-cmp: trigger completion               | <C-Space>                     |
+ Navigation / Search Everywhere               | 5672   | Double Shift        | Cmd+Space / Ctrl+Space     | Telescope: files / live grep               | <leader><leader> / <leader>sg |
+ UI Usability / Speed search in trees         | 3987   | (type to search)    | —                          | Telescope fuzzy search                     | (type after Telescope)        |
+ Code Assistants / Context actions            | 3819   | Option+Enter        | —                          | LSP: code actions                          | <leader>ca                    |
+ Refactoring / Rename                         | 2192   | Shift+F6            | —                          | LSP: rename symbol                         | <leader>rn                    |
+ Navigation / Go to implementation            | 2181   | Option+Cmd+B        | —                          | LSP: go to implementation                  | gI                            |
+ Navigation / Find                            | 1937   | Cmd+F               | —                          | / (buffer search)                          | /                             |
+ Code Assistants / Comment line               | 1924   | Cmd+/               | —                          | Toggle comment                             | gcc                           |
+ Code Editing / Reformat code                 | 1850   | Option+Cmd+L        | —                          | Format buffer                              | <leader>cf                    |
+ Navigation / File structure popup            | 1484   | Cmd+F12             | —                          | Symbols outline                            | <leader>ss                    |
+ Database / Execute SQL Statement             | 792    | Cmd+Enter           | —                          | ❌ vim-dadbod-ui                           | -                             |
+ Database / Database Table Editor             | 731    | —                   | —                          | ❌ vim-dadbod-ui                           | -                             |
+ Refactoring / Introduce Variable             | 652    | Option+Cmd+V        | —                          | ❌ refactoring.nvim                        | -                             |
+ Code Assistants / Highlight method throws    | 618    | —                   | —                          | ❌ (IDE inspection)                        | -                             |
+ Code Editing / Multiple carets               | 607    | Option+Click        | —                          | vim-visual-multi                           | <C-n>                         |
+ UI Usability / Open Project tool window      | 536    | Cmd+1               | Cmd+1                      | neo-tree                                   | <leader>e                     |
+ UI Usability / Hide tool window              | 517    | Shift+Esc           | —                          | Close buffer                               | <leader>bd                    |
+ Code Completion / CamelCase prefixes         | 419    | —                   | —                          | nvim-cmp                                   | auto                          |
+ Code Assistants / Quick Documentation popup  | 207    | F1                  | —                          | LSP hover                                  | K                             |
+ Navigation / Show inheritance hierarchy      | 178    | Ctrl+H              | Ctrl+H / Cmd+Alt+H         | ❌ lspsaga / aerial                        | -                             |
+ Refactoring / Introduce Variable (quick)     | 174    | —                   | —                          | ❌ refactoring.nvim                        | -                             |
+ Navigation / Find in files                   | 171    | Cmd+Shift+F         | —                          | Telescope live grep                        | <leader>sg                    |
+ Code Assistants / Quick Doc on navigation    | 165    | —                   | —                          | LSP hover                                  | K                             |
+ -------------------------------------------- | ------ | ------------------- | -------------------------- | ------------------------------------------ | ----------------------------- | --------------
+ Group / Feature                              | Used   | Hotkey (macOS IDEA) | Overwrite (IDEA keymap)    | LazyVim Command                            | Hotkey (LazyVim)              |
+ -------------------------------------------- | ------ | ------------------- | -------------------------- | ------------------------------------------ | ----------------------------- | --------------
+ UI / Project tool window                     | 0      | —                   | Cmd+1 / Cmd+!              | neo-tree                                   | <leader>e                     |
+ UI / Bookmarks tool window                   | 0      | —                   | Cmd+2 / Cmd+@              | ❌ (нет аналога)                           | -                             |
+ UI / Database tool window                    | 0      | —                   | Cmd+3 / Cmd+#              | ❌ vim-dadbod-ui                           | -                             |
+ UI / Run tool window                         | 0      | —                   | Cmd+4 / Cmd+{              | dap / run                                  | <leader>dr                    |
+ UI / Debug tool window                       | 0      | —                   | Cmd+5 / Cmd+}              | dap-ui                                     | <leader>du                    |
+ UI / Problems tool window                    | 0      | —                   | Cmd+6 / Cmd+[              | Diagnostics                                | <leader>xd                    |
+ UI / Structure tool window                   | 0      | —                   | Cmd+7 / Cmd+]              | Symbols outline                            | <leader>ss                    |
+ UI / Services tool window                    | 0      | —                   | Cmd+8 / Cmd+*              | ❌                                         | -                             |
+ UI / Commit tool window                      | 0      | —                   | Cmd+0 / Cmd+)              | LazyGit                                    | <leader>gg                    |
+ Navigation / Search Everywhere               | 0      | Double Shift        | Cmd+Space / Ctrl+Space     | Telescope                                  | <leader><leader>              |
+ Editor / Delete line                         | 0      | Cmd+Backspace       | Cmd+Backspace              | delete line                                | dd                            |
+ Editor / Increase font size                  | 0      | —                   | Shift+Alt+=                | ❌                                         | -                             |
+ Editor / Decrease font size                  | 0      | —                   | Shift+Alt+-                | ❌                                         | -                             |
+ Editor / Reset font size                     | 0      | —                   | Shift+Alt+)                | ❌                                         | -                             |
+ Editor / Move paragraph forward              | 0      | —                   | Shift+Alt+]                | ❌                                         | -                             |
+ Editor / Move paragraph backward             | 0      | —                   | Shift+Alt+[                | ❌                                         | -                             |
+ VCS / Annotate (blame)                       | 0      | —                   | Ctrl+Shift+A               | gitsigns blame                             | <leader>gb                    |
+ Completion / Inline completion               | 0      | —                   | Shift+Alt+\ / Shift+Ctrl+\ | ❌ (copilot-like)                          | -                             |
+ UI / Toggle distraction free mode            | 0      | —                   | Shift+Alt+\ / Shift+Cmd+\  | zen-mode                                   | <leader>uz                    |
+ -------------------------------------------- | ------ | ------------------- | -------------------------- | ------------------------------------------ | ----------------------------- | --------------
+ Group / Feature                              | Used   | Hotkey (macOS IDEA) | Overwrite (IDEA keymap)    | LazyVim Command                            | Hotkey (LazyVim)              |
 
 --]]
 
-local function cmd_c_tab() tele_b().buffers { sort_mru = true, ignore_current_buffer = true } end
 map("n", "<C-Tab>", cmd_c_tab, "Navigation / Switcher")
 
 -- load last session
