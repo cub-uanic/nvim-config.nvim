@@ -63,6 +63,11 @@ local function is_telescope_active()
   return false
 end
 
+local function press(keys)
+  local termcodes = vim.api.nvim_replace_termcodes(keys, true, false, true)
+  vim.api.nvim_feedkeys(termcodes, "m", false)
+end
+
 local function exec(cmd, return_to_insert)
   if is_telescope_active() then vim.api.nvim_win_close(0, true) end
 
@@ -106,15 +111,13 @@ local function prev_window()
   vim.cmd(("silent %dwincmd w"):format(neww))
 end
 
-local function luasnip_edit_current_ft(visual_precmd)
+local function microsnippets_edit(visual_precmd)
   if visual_precmd then vim.api.nvim_feedkeys(visual_precmd, "x", false) end
   local ft = vim.bo.filetype ~= "" and vim.bo.filetype or "all"
   local base = vim.fn.stdpath "config" .. "/microsnippets"
   vim.fn.mkdir(base, "p")
   vim.cmd { cmd = "edit", args = { base .. "/snippet." .. ft } }
 end
-
-local function is_help_buffer() return vim.bo.buftype == "help" end
 
 local function tagback_or_alternate()
   local ok = pcall(vim.cmd.pop)
@@ -128,79 +131,131 @@ local function tagback_or_alternate()
   end
 end
 
--- storage for last cursor positions per buffer
-local last_positions = {}
+local function jump_gd_gf_help_tag()
+  local cfile = vim.fn.expand "<cfile>"
+  if cfile ~= "" then
+    local ok, err = xpcall(function() vim.cmd "normal! gf" end, function(e) return tostring(e) end)
+    if ok then return end
+    if not (err and (err:match "E447" or err:match "E446")) then error(err) end
+  end
 
--- save cursor position when leaving any buffer
-vim.api.nvim_create_autocmd("BufLeave", {
-  callback = function(args)
-    local bufnr = args.buf
-    if vim.api.nvim_buf_is_loaded(bufnr) then last_positions[bufnr] = vim.api.nvim_win_get_cursor(0) end
-  end,
-})
-
--- restore position if we have it saved
-local function restore_position(bufnr)
-  local pos = last_positions[bufnr]
-  if not pos then return end
-
-  local line_count = vim.api.nvim_buf_line_count(bufnr)
-  if pos[1] <= line_count then vim.api.nvim_win_set_cursor(0, pos) end
-end
-
--- LSP jump wrapper with deterministic restore
-local function jump_with_restore(loc)
-  local uri = loc.uri or loc.targetUri
-  if not uri then return end
-
-  local bufnr = vim.uri_to_bufnr(uri)
-  local already_loaded = vim.api.nvim_buf_is_loaded(bufnr)
-
-  -- open via new LSP API (no deprecated jump_to_location)
-  vim.lsp.util.show_document(loc, "utf-8", { focus = true })
-
-  -- if buffer already existed, BufReadPost will NOT fire
-  -- so we restore manually
-  if already_loaded then vim.schedule(function() restore_position(bufnr) end) end
-end
-
-local function gf_or_tag()
-  -- in help buffers Enter must skip gf/file lookup
-  if not is_help_buffer() then
-    -- LSP definition -> gf -> tag
-    local params = vim.lsp.util.make_position_params(0, "utf-8")
-
-    -- check LSP support
-    for _, client in ipairs(vim.lsp.get_clients { bufnr = 0 }) do
-      if client.supports_method and client:supports_method "textDocument/definition" then
-        local resp = vim.lsp.buf_request_sync(0, "textDocument/definition", params, 1000)
-        if resp then
-          for _, r in pairs(resp) do
-            local result = r.result
-            if result and not vim.tbl_isempty(result) then
-              local loc = result[1] or result
-              jump_with_restore(loc)
-              return
-            end
-          end
-        end
-      end
-    end
-
-    -- gf fallback (let vim resolve path/suffixesadd)
-    if vim.fn.expand "<cfile>" ~= "" then
-      vim.cmd "normal! gf"
+  local cword = vim.fn.expand "<cword>"
+  if cword ~= "" then
+    local pattern = "^" .. vim.fn.escape(cword, [[\.^$~[]]) .. "$"
+    if next(vim.fn.taglist(pattern)) ~= nil then
+      vim.cmd.tag(cword)
       return
     end
   end
 
-  -- tag fallback
-  local cword = vim.fn.expand "<cword>"
-  if cword and cword ~= "" then
-    vim.cmd.tag(cword)
-  else
-    vim.notify("No word under cursor", vim.log.levels.WARN)
+  local cWORD = vim.fn.expand "<cWORD>"
+  local tag = cWORD:match "|([^|]+)|"
+  if tag then
+    vim.cmd.help(tag)
+    return
   end
+
+  vim.notify("No file or tag under cursor", vim.log.levels.INFO)
+end
+
+local function jump_lsp_or_fallback()
+  local clients = vim.lsp.get_clients { bufnr = 0 }
+
+  local function supported_clients(method)
+    local ret = {}
+    for _, client in ipairs(clients) do
+      if client:supports_method(method) then table.insert(ret, client) end
+    end
+    return ret
+  end
+
+  local function current_pos()
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    return row - 1, col
+  end
+
+  local function make_pos_params()
+    local curline, curcol = current_pos()
+    return {
+      textDocument = vim.lsp.util.make_text_document_params(0),
+      position = { line = curline, character = curcol },
+    }
+  end
+
+  local function normalize_location(loc)
+    if loc.uri == nil and loc.targetUri ~= nil then return {
+      uri = loc.targetUri,
+      range = loc.targetSelectionRange or loc.targetRange,
+    } end
+    return loc
+  end
+
+  local function position_in_range(pos, range)
+    local line, col = pos[1], pos[2]
+    local start_line, start_col = range.start.line, range.start.character
+    local end_line, end_col = range["end"].line, range["end"].character
+
+    if line < start_line or line > end_line then return false end
+    if line == start_line and col < start_col then return false end
+    if line == end_line and col >= end_col then return false end
+    return true
+  end
+
+  local function same_location_as_cursor(loc)
+    if not loc then return false end
+
+    local curline, curcol = current_pos()
+    local cururi = vim.uri_from_bufnr(0)
+
+    if loc.targetUri then
+      if loc.targetUri ~= cururi then return false end
+      local range = loc.targetSelectionRange or loc.targetRange
+      return range and position_in_range({ curline, curcol }, range) or false
+    end
+
+    if loc.uri then
+      if loc.uri ~= cururi then return false end
+      return loc.range and position_in_range({ curline, curcol }, loc.range) or false
+    end
+
+    return false
+  end
+
+  local function first_location_from(method, params)
+    local matched = supported_clients(method)
+    if vim.tbl_isempty(matched) then return nil end
+
+    local results = vim.lsp.buf_request_sync(0, method, params, 1000)
+    if not results then return nil end
+
+    for _, client in ipairs(matched) do
+      local res = results[client.id]
+      local result = res and res.result
+
+      if result and not vim.tbl_isempty(result) then
+        local loc = vim.islist(result) and result[1] or result
+        return normalize_location(loc)
+      end
+    end
+
+    return nil
+  end
+
+  local def_loc = first_location_from("textDocument/definition", make_pos_params())
+
+  if def_loc then
+    if same_location_as_cursor(def_loc) then
+      if not vim.tbl_isempty(supported_clients "textDocument/references") then
+        press "gr"
+        return
+      end
+    else
+      press "gd"
+      return
+    end
+  end
+
+  jump_gd_gf_help_tag()
 end
 
 local function cmd_only() exec "only" end
@@ -228,9 +283,9 @@ local function cmd_j_yank() exec [["jy]] end
 local function cmd_f_yank() exec [["fy]] end
 local function cmd_j_paste() exec [["jP]] end
 local function cmd_f_paste() exec [["fP]] end
-local function cmd_v_f2_luasnip_ynk() luasnip_edit_current_ft "y" end
-local function cmd_v_f2_luasnip_del() luasnip_edit_current_ft "d" end
-local function cmd_c_f2_luasnip() luasnip_edit_current_ft() end
+local function cmd_v_microsnippets_yank() microsnippets_edit "y" end
+local function cmd_v_microsnippets_del() microsnippets_edit "d" end
+local function cmd_c_microsnippets() microsnippets_edit() end
 local function cmd_f9_format() LazyVim.format { force = true } end
 local function cmd_s_f9_lens_toggle() vim.lsp.codelens.enable(not vim.lsp.codelens.is_enabled()) end
 local function cmd_c_f9_format_and_select()
@@ -249,7 +304,7 @@ local function cmd_c_tab() tele_b().buffers { sort_mru = true, ignore_current_bu
 --
 map("n", "<Esc>", cmd_reset_search, "Clear highlights")
 map("n", "<Bslash><Bslash>", cmd_reset_search, "Clear highlights")
-map("n", "<CR>", gf_or_tag, "Go to def/gf/tag")
+map("n", "<CR>", jump_lsp_or_fallback, "Go to def/gf/tag")
 map("n", "<BS>", tagback_or_alternate, "Go to back or alternate file")
 
 -- Yank to system clipboard - TODO: delete?.. seems not really needed in LazyVim
@@ -305,9 +360,9 @@ map({ "n", "i" }, { "<C-F1>", "<F25>" }, cmd_close, "Quickfix close")
 map({ "n", "i" }, "<F2>", cmd_write, "Save")
 map({ "n", "i" }, { "<S-F2>", "<F14>" }, cmd_writeall, "Save All")
 -- microsnippets
-map("v", "<F2>", cmd_v_f2_luasnip_ynk, "LuaSnip (yank)")
-map("v", { "<C-F2>", "<F26>" }, cmd_v_f2_luasnip_del, "LuaSnip (yank)")
-map({ "n", "i" }, { "<C-F2>", "<F26>" }, cmd_c_f2_luasnip, "LuaSnip")
+map("v", "<F2>", cmd_v_microsnippets_yank, "Microsnippets (yank)")
+map("v", { "<C-F2>", "<F26>" }, cmd_v_microsnippets_del, "Microsnippets (yank)")
+map({ "n", "i" }, { "<C-F2>", "<F26>" }, cmd_c_microsnippets, "Microsnippets")
 
 -- F3
 map({ "n", "i" }, { "<S-F3>", "<F15>" }, cmd_toggle_bom, "Toggle BOM")
