@@ -1,4 +1,17 @@
 return {
+  {
+    "nvim-telescope/telescope.nvim",
+    opts = function(_, opts)
+      opts = opts or {}
+      opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
+        sorting_strategy = "ascending",
+        layout_strategy = "horizontal",
+        layout_config = { horizontal = { prompt_position = "top", preview_width = 0.6 } },
+      })
+      return opts
+    end,
+  },
+
   { "folke/snacks.nvim", priority = 1000, opts = { scroll = { enabled = false } } },
   { "folke/persistence.nvim", event = "BufReadPre", opts = { need = 0 } },
   { "akinsho/bufferline.nvim", enabled = false },
