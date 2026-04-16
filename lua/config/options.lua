@@ -3,7 +3,7 @@
 -- Add any additional options here
 
 vim.g.have_nerd_font = true
-vim.g.lazyvim_picker = "telescope"
+vim.g.snacks_animate = false
 
 vim.opt.exrc = true
 vim.opt.secure = true
@@ -11,7 +11,7 @@ vim.opt.secure = true
 -- vim.opt.clipboard = "" -- Отключить автокопирование в системный буфер
 vim.opt.spell = false
 vim.opt.spelllang = ""
-vim.opt.spellfile = vim.fn.expand "~/.vim/spell/local.utf-8.add"
+vim.opt.spellfile = vim.fn.expand("~/.vim/spell/local.utf-8.add")
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
 vim.opt.ignorecase = true

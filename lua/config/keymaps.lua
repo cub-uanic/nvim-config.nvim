@@ -2,8 +2,10 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
----@diagnostic disable-next-line: undefined-global
+-- @diagnostic disable-next-line: undefined-global
 local vim = vim
+-- @diagnostic disable-next-line: undefined-global
+local LazyVim = LazyVim
 
 local function map(modes, keys, action, desc, extopt)
   if type(keys) ~= "table" then keys = { keys } end
@@ -17,22 +19,12 @@ end
 local function bufmap(modes, keys, action, desc) map(modes, keys, action, desc, { buffer = 0 }) end
 local function remap(modes, keys, action, desc) map(modes, keys, action, desc, { remap = true }) end
 
-local function plugin(plug)
-  plug = plug or "telescope.builtin"
-  local ok, t = pcall(require, plug)
-  if ok then return t end
-  return nil
-end
-
-local function tele_b() return plugin "telescope.builtin" end
-local function gitsigns() return plugin "gitsigns" end
-
 local function ensure_parent_dir_for_current_buffer()
   local buf = vim.api.nvim_get_current_buf()
   local fname = vim.api.nvim_buf_get_name(buf)
 
   if fname == nil or fname == "" then return true end -- No name / special buffers
-  if fname:match "^%a+://" then return true end -- Don't try to create dirs for non-file buffers (netrw, fugitive, etc.)
+  if fname:match("^%a+://") then return true end -- Don't try to create dirs for non-file buffers (netrw, fugitive, etc.)
 
   local dir = vim.fn.fnamemodify(fname, ":h")
   if dir == nil or dir == "" or dir == "." then return true end
@@ -57,7 +49,7 @@ local function is_telescope_active()
     if vim.api.nvim_buf_is_loaded(buf) then
       local buf_type = vim.api.nvim_get_option_value("buftype", { buf = buf })
       local buf_name = vim.api.nvim_buf_get_name(buf)
-      if buf_type == "prompt" or buf_name:match "Telescope" then return true end
+      if buf_type == "prompt" or buf_name:match("Telescope") then return true end
     end
   end
   return false
@@ -72,19 +64,19 @@ local function exec(cmd, return_to_insert)
   if is_telescope_active() then vim.api.nvim_win_close(0, true) end
 
   local mode = vim.fn.mode(1)
-  local was_insert = mode:match "^i"
+  local was_insert = mode:match("^i")
 
-  if was_insert then vim.cmd "stopinsert" end
+  if was_insert then vim.cmd("stopinsert") end
 
-  local c = (cmd:match "^%S+" or ""):lower()
-  if c:match "^w(rite|all|a)?$" then
+  local c = (cmd:match("^%S+") or ""):lower()
+  if c:match("^w(rite|all|a)?$") then
     if not ensure_parent_dir_for_current_buffer() then return end
   end
 
   local ok, err = pcall(function() vim.cmd(cmd) end)
   if not ok then
-    if tostring(err):match "E444" then
-      vim.notify "Can't close last buffer" --
+    if tostring(err):match("E444") then
+      vim.notify("Can't close last buffer") --
     end
   end
 
@@ -97,7 +89,7 @@ end
 
 local function next_window()
   local cur = vim.fn.winnr()
-  local last = vim.fn.winnr "$"
+  local last = vim.fn.winnr("$")
   local neww = cur + 1
   if neww > last then neww = 1 end
   vim.cmd(("silent %dwincmd w"):format(neww))
@@ -105,7 +97,7 @@ end
 
 local function prev_window()
   local cur = vim.fn.winnr()
-  local last = vim.fn.winnr "$"
+  local last = vim.fn.winnr("$")
   local neww = cur - 1
   if neww < 1 then neww = last end
   vim.cmd(("silent %dwincmd w"):format(neww))
@@ -114,17 +106,17 @@ end
 local function microsnippets_edit(visual_precmd)
   if visual_precmd then vim.api.nvim_feedkeys(visual_precmd, "x", false) end
   local ft = vim.bo.filetype ~= "" and vim.bo.filetype or "all"
-  local base = vim.fn.stdpath "config" .. "/microsnippets"
+  local base = vim.fn.stdpath("config") .. "/microsnippets"
   vim.fn.mkdir(base, "p")
-  vim.cmd { cmd = "edit", args = { base .. "/snippet." .. ft } }
+  vim.cmd({ cmd = "edit", args = { base .. "/snippet." .. ft } })
 end
 
 local function tagback_or_alternate()
   local ok = pcall(vim.cmd.pop)
   if not ok then
-    local alt_bufnr = vim.fn.bufnr "#"
+    local alt_bufnr = vim.fn.bufnr("#")
     if alt_bufnr > 0 and vim.api.nvim_buf_is_loaded(alt_bufnr) then
-      vim.cmd "buffer #"
+      vim.cmd("buffer #")
     else
       vim.notify("No tag stack and no alternate buffer", vim.log.levels.WARN)
     end
@@ -132,14 +124,14 @@ local function tagback_or_alternate()
 end
 
 local function jump_gd_gf_help_tag()
-  local cfile = vim.fn.expand "<cfile>"
+  local cfile = vim.fn.expand("<cfile>")
   if cfile ~= "" then
-    local ok, err = xpcall(function() vim.cmd "normal! gf" end, function(e) return tostring(e) end)
+    local ok, err = xpcall(function() vim.cmd("normal! gf") end, function(e) return tostring(e) end)
     if ok then return end
-    if not (err and (err:match "E447" or err:match "E446")) then error(err) end
+    if not (err and (err:match("E447") or err:match("E446"))) then error(err) end
   end
 
-  local cword = vim.fn.expand "<cword>"
+  local cword = vim.fn.expand("<cword>")
   if cword ~= "" then
     local pattern = "^" .. vim.fn.escape(cword, [[\.^$~[]]) .. "$"
     if next(vim.fn.taglist(pattern)) ~= nil then
@@ -148,8 +140,8 @@ local function jump_gd_gf_help_tag()
     end
   end
 
-  local cWORD = vim.fn.expand "<cWORD>"
-  local tag = cWORD:match "|([^|]+)|"
+  local cWORD = vim.fn.expand("<cWORD>")
+  local tag = cWORD:match("|([^|]+)|")
   if tag then
     vim.cmd.help(tag)
     return
@@ -159,7 +151,7 @@ local function jump_gd_gf_help_tag()
 end
 
 local function jump_lsp_or_fallback()
-  local clients = vim.lsp.get_clients { bufnr = 0 }
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
 
   local function supported_clients(method)
     local ret = {}
@@ -245,12 +237,12 @@ local function jump_lsp_or_fallback()
 
   if def_loc then
     if same_location_as_cursor(def_loc) then
-      if not vim.tbl_isempty(supported_clients "textDocument/references") then
-        press "gr"
+      if not vim.tbl_isempty(supported_clients("textDocument/references")) then
+        press("gr")
         return
       end
     else
-      press "gd"
+      press("gd")
       return
     end
   end
@@ -258,46 +250,48 @@ local function jump_lsp_or_fallback()
   jump_gd_gf_help_tag()
 end
 
-local function cmd_only() exec "only" end
-local function cmd_copen() exec "copen" end
-local function cmd_close() exec "close" end
-local function cmd_write() exec "w" end
-local function cmd_writeall() exec "wall" end
-local function cmd_writeall_quit() exec "wqa" end
-local function cmd_quit_all() exec "qa" end
-local function cmd_quit_all_force() exec "qa!" end
+local function cmd_only() exec("only") end
+local function cmd_copen() exec("copen") end
+local function cmd_close() exec("close") end
+local function cmd_write() exec("w") end
+local function cmd_writeall() exec("wall") end
+local function cmd_writeall_quit() exec("wqa") end
+local function cmd_quit_all() exec("qa") end
+local function cmd_quit_all_force() exec("qa!") end
 local function cmd_toggle_bom() vim.bo.bomb = not vim.bo.bomb end
 local function cmd_toggle_listchars() vim.opt.list = not vim.opt.list end
-local function cmd_tb_symbol_list() tele_b().lsp_document_symbols() end
-local function cmd_tb_tag_list() tele_b().tags() end
-local function cmd_tb_recent() tele_b().oldfiles() end
-local function cmd_tb_buf_ff() tele_b().current_buffer_fuzzy_find() end
-local function cmd_tb_buffers() tele_b().buffers() end
-local function cmd_git_blame_line() gitsigns().blame() end
-local function cmd_edit_alt() exec "edit #" end
-local function cmd_cp() exec "cp" end
-local function cmd_bp() exec "bp" end
-local function cmd_cn() exec "cn" end
-local function cmd_bn() exec "bn" end
-local function cmd_j_yank() exec [["jy]] end
-local function cmd_f_yank() exec [["fy]] end
-local function cmd_j_paste() exec [["jP]] end
-local function cmd_f_paste() exec [["fP]] end
-local function cmd_v_microsnippets_yank() microsnippets_edit "y" end
-local function cmd_v_microsnippets_del() microsnippets_edit "d" end
+local function cmd_tb_symbol_list() LazyVim.pick("lsp_document_symbols")() end
+local function cmd_tb_tag_list() LazyVim.pick("tags")() end
+local function cmd_tb_recent() LazyVim.pick("oldfiles")() end
+local function cmd_tb_buf_ff() LazyVim.pick("grep_curbuf")() end
+local function cmd_tb_buffers() LazyVim.pick("buffers")() end
+local function cmd_git_blame_line() require("blame-column").toggle() end
+local function cmd_edit_alt() exec("edit #") end
+local function cmd_cp() exec("cp") end
+local function cmd_bp() exec("bp") end
+local function cmd_cn() exec("cn") end
+local function cmd_bn() exec("bn") end
+local function cmd_j_yank() exec([["jy]]) end
+local function cmd_f_yank() exec([["fy]]) end
+local function cmd_j_paste() exec([["jP]]) end
+local function cmd_f_paste() exec([["fP]]) end
+local function cmd_v_microsnippets_yank() microsnippets_edit("y") end
+local function cmd_v_microsnippets_del() microsnippets_edit("d") end
 local function cmd_c_microsnippets() microsnippets_edit() end
-local function cmd_f9_format() LazyVim.format { force = true } end
+local function cmd_f9_format() LazyVim.format({ force = true }) end
 local function cmd_s_f9_lens_toggle() vim.lsp.codelens.enable(not vim.lsp.codelens.is_enabled()) end
 local function cmd_c_f9_format_and_select()
-  LazyVim.format { force = true }
+  LazyVim.format({ force = true })
   cmd_write()
   LazyVim.pick()()
 end
-local function cmd_lg_cword() LazyVim.pick("live_grep", { default_text = vim.fn.expand "<cword>" })() end
-local function cmd_security_file() vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.stdpath "state" .. "/trust")) end
-local function cmd_yank_to_system() vim.fn.setreg("+", vim.fn.getreg '"') end
-local function cmd_reset_search() exec "nohlsearch" end
-local function cmd_c_tab() tele_b().buffers { sort_mru = true, ignore_current_buffer = true } end
+local function cmd_search_picker() LazyVim.pick("builtin", { fuzzy = true })() end
+local function cmd_search_buffers_fzf() LazyVim.pick("lines", { fuzzy = true })() end
+local function cmd_lg_cword() LazyVim.pick("live_grep", { default_text = vim.fn.expand("<cword>") })() end
+local function cmd_security_file() vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.stdpath("state") .. "/trust")) end
+local function cmd_yank_to_system() vim.fn.setreg("+", vim.fn.getreg('"')) end
+local function cmd_reset_search() exec("nohlsearch") end
+local function cmd_c_tab() LazyVim.pick("buffers", { sort_mru = true, ignore_current_buffer = true })() end
 
 --
 -- Hotkeys definitions
@@ -318,9 +312,6 @@ map("n", "<C-o>", "<C-w>j", "Window down")
 map("n", "<C-i>", "<C-w>l", "Window right")
 
 -- Resize windows (useful for terminal splits)
-map("n", "<C-u>", "<C-w>+", "Increase window height")
-map("n", "<C-p>", "<C-w>-", "Decrease window height")
-
 map("n", "<C-S-n>", "<C-w><", "Decrease window width")
 map("n", "<C-S-e>", "<C-w>+", "Increase window height")
 map("n", "<C-S-o>", "<C-w>-", "Decrease window height")
@@ -330,6 +321,9 @@ map("n", "<A-Left>", "<C-w><", "Decrease window width")
 map("n", "<A-Down>", "<C-w>+", "Increase window height")
 map("n", "<A-Up>", "<C-w>-", "Decrease window height")
 map("n", "<A-Right>", "<C-w>>", "Increase window width")
+
+-- map("n", "<C-u>", "<C-w>+", "Increase window height")
+-- map("n", "<C-p>", "<C-w>-", "Decrease window height")
 
 -- Terminal mode (works with toggleterm.nvim and any :terminal)
 map("t", "<C-n>", [[<C-\><C-n><C-w>h]], "Terminal window left")
@@ -374,8 +368,7 @@ map({ "n", "i" }, { "<S-F4>", "<F16>" }, cmd_tb_tag_list, "Tags list") -- :Tlist
 
 -- F5
 map({ "n", "i" }, "<F5>", cmd_tb_recent, "Recent files")
-map("v", "<F5>", cmd_git_blame_line, "Git blame") -- TODO: gitsigns don't work with VISUAL, need another plugin
-map({ "n", "i" }, { "<S-F5>", "<F17>" }, cmd_reset_search, "Reset search") -- TODO: delete? already mapped to ESC
+map({ "n", "i" }, { "<S-F5>", "<F17>" }, cmd_git_blame_line, "Toggle Git blame")
 map({ "n", "i" }, { "<C-F5>", "<F29>" }, cmd_tb_buf_ff, "Fuzzy in current buffer")
 
 -- F6
@@ -417,7 +410,9 @@ map({ "n", "v", "i" }, "<C-N>", cmd_f_yank, 'Yank to "f"')
 map({ "n", "i" }, "<C-K>", cmd_j_paste, 'Paste from "j"')
 map({ "n", "i" }, "<C-L>", cmd_f_paste, 'Paste from "f"')
 
--- live grep by word
+-- misc searches
+map("n", "<Leader>sp", cmd_search_picker, "FZF picker")
+map("n", "<Leader>sB", cmd_search_buffers_fzf, "Buffer Lines (fzf)")
 map("n", "<Leader>sv", cmd_lg_cword, "LiveGrep (cword)")
 
 -- Edit trust database

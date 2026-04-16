@@ -1,23 +1,28 @@
 return {
+  -- {
+  --   "nvim-telescope/telescope.nvim",
+  --   opts = {
+  --     defaults = {
+  --       sorting_strategy = "ascending",
+  --       layout_strategy = "horizontal",
+  --       layout_config = { horizontal = { prompt_position = "top", preview_width = 0.6 } },
+  --     },
+  --   },
+  -- },
+
   {
-    "nvim-telescope/telescope.nvim",
-    opts = function(_, opts)
-      opts = opts or {}
-      opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
-        sorting_strategy = "ascending",
-        layout_strategy = "horizontal",
-        layout_config = { horizontal = { prompt_position = "top", preview_width = 0.6 } },
-      })
-      return opts
-    end,
+    "folke/snacks.nvim",
+    priority = 1000,
+    opts = {
+      notifier = { enabled = true, timeout = 5000 },
+      scroll = { enabled = false },
+    },
   },
 
-  { "folke/snacks.nvim", priority = 1000, opts = { scroll = { enabled = false } } },
   { "folke/persistence.nvim", event = "BufReadPre", opts = { need = 0 } },
   { "akinsho/bufferline.nvim", enabled = false },
 
-  { "EdenEast/nightfox.nvim" },
-  { "rose-pine/neovim" },
+  { "Yu-Leo/blame-column.nvim" },
 
   {
     "nvim-mini/mini.hipatterns",
@@ -36,6 +41,10 @@ return {
       },
     },
   },
+
+  -- additional colorschemes
+  { "EdenEast/nightfox.nvim" },
+  { "rose-pine/neovim" },
 }
 
 -- vim: ts=2 sts=2 sw=2 et
