@@ -355,7 +355,7 @@ map({ "n", "i" }, "<F2>", cmd_write, "Save")
 map({ "n", "i" }, { "<S-F2>", "<F14>" }, cmd_writeall, "Save All")
 -- microsnippets
 map("v", "<F2>", cmd_v_microsnippets_yank, "Microsnippets (yank)")
-map("v", { "<C-F2>", "<F26>" }, cmd_v_microsnippets_del, "Microsnippets (yank)")
+map("v", { "<C-F2>", "<F26>" }, cmd_v_microsnippets_del, "Microsnippets (delete)")
 map({ "n", "i" }, { "<C-F2>", "<F26>" }, cmd_c_microsnippets, "Microsnippets")
 
 -- F3
