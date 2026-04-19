@@ -1,17 +1,3 @@
-local default_filetypes = {
-  { text = "css" },
-  { text = "html" },
-  { text = "javascript" },
-  { text = "javascriptreact" },
-  { text = "lua" },
-  { text = "markdown" },
-  { text = "python" },
-  { text = "typescript" },
-  { text = "typescriptreact" },
-  { text = "java" },
-  { text = "kotlin" },
-}
-
 local M = {}
 
 local function reset_column_widths() return { 0, 0, 0, 0 } end
@@ -96,6 +82,51 @@ local function load_scratch_items()
   return normalized
 end
 
+function M.new_scratch()
+  Snacks.picker.pick({
+    items = {
+      { text = "java" },
+      { text = "python" },
+      { text = "perl" },
+      { text = "lua" },
+      { text = "javascript" },
+      { text = "javascriptreact" },
+      { text = "typescript" },
+      { text = "typescriptreact" },
+      { text = "html" },
+      { text = "css" },
+      { text = "kotlin" },
+      { text = "markdown" },
+      { text = "txt" },
+    },
+    format = "text",
+    layout = {
+      -- preset = "vscode",
+      preview = "main",
+      layout = { title = " Select a filetype: " },
+    },
+    on_change = function() vim.cmd.startinsert() end,
+    confirm = function(picker, item)
+      picker:close()
+
+      vim.schedule(function()
+        local ft = item and item.text or nil
+
+        if not ft or ft == "" then
+          local filter = picker.filter and picker:filter() or nil
+          ft = filter and filter.pattern or ""
+        end
+
+        if ft ~= "" then
+          Snacks.scratch.open({ ft = ft })
+        else
+          Snacks.scratch.open()
+        end
+      end)
+    end,
+  })
+end
+
 function M.select_scratch()
   local items = load_scratch_items()
 
@@ -142,44 +173,8 @@ function M.select_scratch()
     confirm = function(_, item)
       if not item or not item.file or item.file == "" then return end
 
-      -- Открываем только по file — НЕ трогаем ft/name/icon, чтобы избежать E474
       Snacks.scratch.open({ file = item.file })
     end,
-  })
-end
-
-function M.new_scratch(filetypes)
-  local items = filetypes or default_filetypes
-
-  Snacks.picker.pick({
-    source = "scratch",
-    items = items,
-    format = "text",
-    layout = {
-      preset = "vscode",
-      preview = "main",
-      layout = { title = " Select a filetype: " },
-    },
-    actions = {
-      confirm = function(picker, item)
-        picker:close()
-
-        vim.schedule(function()
-          local ft = item and item.text or nil
-
-          if not ft or ft == "" then
-            local filter = picker.filter and picker:filter() or nil
-            ft = filter and filter.pattern or ""
-          end
-
-          if ft ~= "" then
-            Snacks.scratch.open({ ft = ft })
-          else
-            Snacks.scratch.open()
-          end
-        end)
-      end,
-    },
   })
 end
 
