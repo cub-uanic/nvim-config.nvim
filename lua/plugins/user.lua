@@ -17,12 +17,24 @@ return {
       notifier = { enabled = true, timeout = 5000 },
       scroll = { enabled = false },
     },
+    keys = {
+      { "-", function() require("utils").new_scratch() end, desc = "Toggle Scratch Buffer" },
+      { "_", function() require("utils").select_scratch() end, desc = "Select Scratch Buffer" },
+    },
   },
 
   { "folke/persistence.nvim", event = "BufReadPre", opts = { need = 0 } },
   { "akinsho/bufferline.nvim", enabled = false },
 
   { "Yu-Leo/blame-column.nvim" },
+
+  -- {
+  --   "neovim/nvim-lspconfig",
+  --   opts = {
+  --     codelens = { enabled = true },
+  --     servers = { ["*"] = { settings = { codeLens = { enable = true } } } },
+  --   },
+  -- },
 
   {
     "nvim-mini/mini.hipatterns",
