@@ -292,6 +292,8 @@ local function cmd_security_file() vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.
 local function cmd_yank_to_system() vim.fn.setreg("+", vim.fn.getreg('"')) end
 local function cmd_reset_search() exec("nohlsearch") end
 local function cmd_c_tab() LazyVim.pick("buffers", { sort_mru = true, ignore_current_buffer = true, show_untracked = true })() end
+local function cmd_new_scratch() require("utils").new_scratch() end
+local function cmd_select_scratch() require("utils").select_scratch() end
 
 --
 -- Hotkeys definitions
@@ -417,6 +419,10 @@ map("n", "<Leader>sv", cmd_lg_cword, "LiveGrep (cword)")
 
 -- Edit trust database
 map("n", "<Leader>fs", cmd_security_file, "Edit trust database")
+
+-- Scratch buffers
+map("n", "<Leader>tn", cmd_new_scratch, "New Scratch Buffer")
+map("n", "<Leader>te", cmd_select_scratch, "Select Scratch Buffer")
 
 -- TODO: Mirror/Reverse
 

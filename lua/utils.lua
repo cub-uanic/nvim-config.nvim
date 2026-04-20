@@ -70,7 +70,7 @@ end
 function M.new_scratch()
   Snacks.picker.pick({
     items = {
-      { text = "java" },
+      -- { text = "java" },
       { text = "python" },
       { text = "perl" },
       { text = "lua" },

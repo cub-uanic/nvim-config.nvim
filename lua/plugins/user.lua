@@ -17,10 +17,6 @@ return {
       notifier = { enabled = true, timeout = 5000 },
       scroll = { enabled = false },
     },
-    keys = {
-      { "-", function() require("utils").new_scratch() end, desc = "Toggle Scratch Buffer" },
-      { "_", function() require("utils").select_scratch() end, desc = "Select Scratch Buffer" },
-    },
   },
 
   { "folke/persistence.nvim", event = "BufReadPre", opts = { need = 0 } },
