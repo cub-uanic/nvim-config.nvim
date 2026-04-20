@@ -17,26 +17,27 @@ local function normalize_item(item)
   item = item or {}
 
   item.file = safe_str(item.file)
-  item.ft = safe_str(item.ft)
-  if item.ft == "" then item.ft = "text" end
-
+  item.ft = safe_str(item.ft and item.ft or "text")
+  item.cwd = safe_str(item.cwd and vim.fn.fnamemodify(item.cwd, ":p:~") or "")
+  item.branch = safe_str(item.branch and ("branch:%s"):format(item.branch) or "")
+  item.icon = safe_str(item.icon and item.icon or get_icon(item.ft))
+  item._path = item.file
+  item.preview = { text = item.file }
   item.name = safe_str(item.name)
+
   if item.name == "" and item.file ~= "" then item.name = vim.fn.fnamemodify(item.file, ":t:r") end
   if item.name == "" then item.name = "[scratch]" end
 
-  item.cwd = item.cwd and vim.fn.fnamemodify(item.cwd, ":p:~") or ""
-  item.cwd = safe_str(item.cwd)
-
-  item.branch = item.branch and ("branch:%s"):format(item.branch) or ""
-  item.branch = safe_str(item.branch)
-
-  item.icon = safe_str(item.icon)
-  if item.icon == "" then item.icon = get_icon(item.ft) end
-
-  item._path = item.file
-  item.preview = { text = item.file }
-
   return item
+end
+
+local function format_item_text(item, widths)
+  local parts = { safe_str(item.cwd), safe_str(item.icon), safe_str(item.name), safe_str(item.branch) }
+  for i, part in ipairs(parts) do
+    local padding = math.max(0, (widths[i] or 0) - vim.api.nvim_strwidth(part))
+    parts[i] = part .. string.rep(" ", padding)
+  end
+  return table.concat(parts, " ")
 end
 
 local function update_column_widths(widths, item)
@@ -46,23 +47,7 @@ local function update_column_widths(widths, item)
   widths[4] = math.max(widths[4], vim.api.nvim_strwidth(item.branch or ""))
 end
 
-local function format_item_text(item, widths)
-  local parts = {
-    safe_str(item.cwd),
-    safe_str(item.icon),
-    safe_str(item.name),
-    safe_str(item.branch),
-  }
-
-  for i, part in ipairs(parts) do
-    local padding = math.max(0, (widths[i] or 0) - vim.api.nvim_strwidth(part))
-    parts[i] = part .. string.rep(" ", padding)
-  end
-
-  return table.concat(parts, " ")
-end
-
-local function load_scratch_items()
+local function process_items()
   local ok, items = pcall(Snacks.scratch.list)
   if not ok or type(items) ~= "table" then return {} end
 
@@ -101,26 +86,19 @@ function M.new_scratch()
     },
     format = "text",
     layout = {
-      -- preset = "vscode",
+      preset = "vscode",
       preview = "main",
       layout = { title = " Select a filetype: " },
     },
     on_change = function() vim.cmd.startinsert() end,
     confirm = function(picker, item)
       picker:close()
-
       vim.schedule(function()
-        local ft = item and item.text or nil
-
-        if not ft or ft == "" then
-          local filter = picker.filter and picker:filter() or nil
-          ft = filter and filter.pattern or ""
-        end
-
-        if ft ~= "" then
-          Snacks.scratch.open({ ft = ft })
+        local items = picker:items()
+        if #items == 0 then
+          Snacks.scratch({ ft = picker:filter().pattern })
         else
-          Snacks.scratch.open()
+          Snacks.scratch({ ft = item.text })
         end
       end)
     end,
@@ -128,7 +106,7 @@ function M.new_scratch()
 end
 
 function M.select_scratch()
-  local items = load_scratch_items()
+  local items = process_items()
 
   if #items == 0 then
     vim.notify("No scratch buffers found", vim.log.levels.INFO)
@@ -145,10 +123,7 @@ function M.select_scratch()
       preset = function() return vim.o.columns >= 120 and "default" or "vertical" end,
     },
     on_change = function() vim.cmd.startinsert() end,
-    transform = function(item)
-      item = normalize_item(item)
-      return item
-    end,
+    transform = function(item) return normalize_item(item) end,
     win = {
       input = {
         keys = {
