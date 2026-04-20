@@ -1,6 +1,6 @@
 -- vim: ts=2 sts=2 sw=2 et
 
-vim.cmd.colorscheme "default"
+vim.cmd.colorscheme("default")
 
 --[[
 vim.cmd.colorscheme("catppuccin-mocha")
@@ -20,6 +20,10 @@ vim.cmd.colorscheme("duskfox")
 vim.cmd.colorscheme("rose-pine-main")
 vim.cmd.colorscheme("rose-pine-moon")
 vim.cmd.colorscheme("oxocarbon")
+vim.cmd.colorscheme("material-darker")
+vim.cmd.colorscheme("material-oceanic")
+vim.cmd.colorscheme("material-palenight")
+vim.cmd.colorscheme("material-deep-ocean")
 --]]
 
 vim.notify("Local setting applied", vim.log.levels.INFO)

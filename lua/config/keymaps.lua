@@ -291,7 +291,7 @@ local function cmd_lg_cword() LazyVim.pick("live_grep", { default_text = vim.fn.
 local function cmd_security_file() vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.stdpath("state") .. "/trust")) end
 local function cmd_yank_to_system() vim.fn.setreg("+", vim.fn.getreg('"')) end
 local function cmd_reset_search() exec("nohlsearch") end
-local function cmd_c_tab() LazyVim.pick("buffers", { sort_mru = true, ignore_current_buffer = true })() end
+local function cmd_c_tab() LazyVim.pick("buffers", { sort_mru = true, ignore_current_buffer = true, show_untracked = true })() end
 
 --
 -- Hotkeys definitions
@@ -374,7 +374,7 @@ map({ "n", "i" }, { "<C-F5>", "<F29>" }, cmd_tb_buf_ff, "Fuzzy in current buffer
 -- F6
 map({ "n", "i" }, "<F6>", cmd_tb_buffers, "Telescope: buffers")
 map({ "n", "i" }, { "<S-F6>", "<F18>" }, cmd_tb_tag_list, "Tags list") -- :Tags   TODO: delete? requires ctags
-map({ "n", "i" }, { "<C-F6>", "<F30>" }, cmd_edit_alt, "Edit alternate file")
+map({ "n", "i" }, { "<C-F6>", "<F30>", "<C-`>" }, cmd_edit_alt, "Edit alternate file")
 
 -- F7
 map({ "n", "i" }, "<F7>", next_window, "Next window")
