@@ -3,15 +3,22 @@
 vim.cmd.colorscheme("default")
 
 --[[
+
+-- keep in sync with lua/colorschemes.lua
+
+vim.cmd.colorscheme("default")
+
+-- most popular
+vim.cmd.colorscheme("catppuccin-frappe")
+vim.cmd.colorscheme("catppuccin-macchiato")
 vim.cmd.colorscheme("catppuccin-mocha")
 vim.cmd.colorscheme("dracula")
 vim.cmd.colorscheme("kanagawa-dragon")
 vim.cmd.colorscheme("kanagawa-wave")
-vim.cmd.colorscheme("koehler")
 vim.cmd.colorscheme("tokyonight-moon")
 vim.cmd.colorscheme("tokyonight-storm")
 vim.cmd.colorscheme("tokyonight-night")
-vim.cmd.colorscheme("torte")
+vim.cmd.colorscheme("tokyodark")
 vim.cmd.colorscheme("wildcharm")
 vim.cmd.colorscheme("carbonfox")
 vim.cmd.colorscheme("nightfox")
@@ -26,6 +33,82 @@ vim.cmd.colorscheme("material-oceanic")
 vim.cmd.colorscheme("material-palenight")
 vim.cmd.colorscheme("material-deep-ocean")
 vim.cmd.colorscheme("nord")
+
+-- less popular
+vim.cmd.colorscheme("arctic")
+vim.cmd.colorscheme("bamboo-multiplex")
+vim.cmd.colorscheme("bamboo-vulgaris")
+vim.cmd.colorscheme("batman")
+vim.cmd.colorscheme("bluloco-dark")
+vim.cmd.colorscheme("darcula-solid")
+vim.cmd.colorscheme("eldritch-dark")
+vim.cmd.colorscheme("eldritch-minimal")
+vim.cmd.colorscheme("everforest")
+vim.cmd.colorscheme("fusion")
+vim.cmd.colorscheme("gruvbox-material")
+vim.cmd.colorscheme("moonfly")
+vim.cmd.colorscheme("nightfly")
+vim.cmd.colorscheme("nordic")
+vim.cmd.colorscheme("onenord")
+vim.cmd.colorscheme("sonokai")
+vim.cmd.colorscheme("vague")
+vim.cmd.colorscheme("zenburned")
+vim.cmd.colorscheme("zenwritten")
+
+-- github collection
+vim.cmd.colorscheme("github_dark_colorblind")
+vim.cmd.colorscheme("github_dark_default")
+vim.cmd.colorscheme("github_dark_dimmed")
+vim.cmd.colorscheme("github_dark_high_contrast")
+vim.cmd.colorscheme("github_dark_tritanopia")
+
+-- pastel collection
+vim.cmd.colorscheme("pastelblack")
+vim.cmd.colorscheme("pastelcool")
+vim.cmd.colorscheme("pastelcream")
+vim.cmd.colorscheme("pasteldark")
+vim.cmd.colorscheme("pastelfog")
+vim.cmd.colorscheme("pastelmint")
+vim.cmd.colorscheme("pastelpop")
+vim.cmd.colorscheme("pastelrose")
+vim.cmd.colorscheme("pastelwarm")
+
+-- minimal number of colors
+vim.cmd.colorscheme("quiet")
+vim.cmd.colorscheme("duckbones")
+vim.cmd.colorscheme("forestbones")
+vim.cmd.colorscheme("kanagawabones")
+vim.cmd.colorscheme("nordbones")
+vim.cmd.colorscheme("rosebones")
+vim.cmd.colorscheme("seoulbones")
+vim.cmd.colorscheme("tokyobones")
+vim.cmd.colorscheme("randombones_dark")
+
+-- errors on fully-red background
+vim.cmd.colorscheme("apprentice")
+vim.cmd.colorscheme("darc")
+vim.cmd.colorscheme("desert")
+vim.cmd.colorscheme("doubletrouble")
+vim.cmd.colorscheme("elflord")
+vim.cmd.colorscheme("evening")
+vim.cmd.colorscheme("gruvbox")
+vim.cmd.colorscheme("habamax")
+vim.cmd.colorscheme("industry")
+vim.cmd.colorscheme("jellybeans-nvim")
+vim.cmd.colorscheme("koehler")
+vim.cmd.colorscheme("lunaperche")
+vim.cmd.colorscheme("melange")
+vim.cmd.colorscheme("murphy")
+vim.cmd.colorscheme("pablo")
+vim.cmd.colorscheme("retrobox")
+vim.cmd.colorscheme("ron")
+vim.cmd.colorscheme("slate")
+vim.cmd.colorscheme("sorbet")
+vim.cmd.colorscheme("torte")
+vim.cmd.colorscheme("unokai")
+vim.cmd.colorscheme("vim")
+vim.cmd.colorscheme("zaibatsu")
+
 --]]
 
 vim.notify("Local setting applied", vim.log.levels.INFO)

@@ -266,6 +266,7 @@ local function cmd_ff_recent() LazyVim.pick("oldfiles")() end
 local function cmd_ff_curr_buffer() LazyVim.pick("grep_curbuf")() end
 local function cmd_ff_buffers() LazyVim.pick("buffers")() end
 local function cmd_git_blame_line() require("blame-column").toggle() end
+local function cmd_preferred_colorschemes() require("colorschemes").preferred_colorschemes() end
 local function cmd_edit_alt() exec("edit #") end
 local function cmd_cp() exec("cp") end
 local function cmd_bp() exec("bp") end
@@ -419,6 +420,9 @@ map("n", "<Leader>sv", cmd_ff_cword, "LiveGrep (cword)")
 
 -- Edit trust database
 map("n", "<Leader>fs", cmd_security_file, "Edit trust database")
+
+-- Preferred colorschemes
+map("n", "<Leader>uu", cmd_preferred_colorschemes, "Preferred colorschemes")
 
 -- Scratch buffers
 map("n", "<Leader>tn", cmd_new_scratch, "New Scratch Buffer")

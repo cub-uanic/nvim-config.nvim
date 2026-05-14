@@ -1,15 +1,4 @@
 return {
-  -- {
-  --   "nvim-telescope/telescope.nvim",
-  --   opts = {
-  --     defaults = {
-  --       sorting_strategy = "ascending",
-  --       layout_strategy = "horizontal",
-  --       layout_config = { horizontal = { prompt_position = "top", preview_width = 0.6 } },
-  --     },
-  --   },
-  -- },
-
   {
     "LazyVim/LazyVim",
     -- It's recommended to leave version=false for now, since a lot the plugin that support versioning,
@@ -29,16 +18,7 @@ return {
 
   { "folke/persistence.nvim", event = "BufReadPre", opts = { need = 0 } },
   { "akinsho/bufferline.nvim", enabled = false },
-
   { "Yu-Leo/blame-column.nvim" },
-
-  -- {
-  --   "neovim/nvim-lspconfig",
-  --   opts = {
-  --     codelens = { enabled = true },
-  --     servers = { ["*"] = { settings = { codeLens = { enable = true } } } },
-  --   },
-  -- },
 
   {
     "nvim-mini/mini.hipatterns",
@@ -58,11 +38,55 @@ return {
     },
   },
 
+  -- most preferred colorschemes
+  { "catppuccin/nvim" },
+  { "folke/tokyonight.nvim" },
+  { "tiagovla/tokyodark.nvim" },
+  { "rebelot/kanagawa.nvim" },
+  { "Mofiqul/dracula.nvim" },
+
   -- additional colorschemes
   { "EdenEast/nightfox.nvim" },
   { "rose-pine/neovim" },
   { "marko-cerovac/material.nvim" },
   { "shaunsingh/nord.nvim" },
+  { "navarasu/onedark.nvim" },
+  { "projekt0n/github-nvim-theme" },
+  { "bluz71/vim-moonfly-colors" },
+  { "bluz71/vim-nightfly-colors" },
+  {
+    "ribru17/bamboo.nvim",
+    config = function()
+      require("bamboo").setup({})
+      require("bamboo").load()
+    end,
+  },
+  { "the-coding-doggo/batman.nvim" },
+  { "ellisonleao/gruvbox.nvim" },
+  { "sainnhe/gruvbox-material" },
+  { "sainnhe/everforest" },
+  { "sainnhe/sonokai" },
+  { "eldritch-theme/eldritch.nvim" },
+  { "ankushbhagats/pastel.nvim" },
+  { "lfenzo/fusion.nvim" },
+  { "nyoom-engineering/oxocarbon.nvim" },
+  { "vague-theme/vague.nvim" },
+  { "zenbones-theme/zenbones.nvim" },
+  { "AlexvZyl/nordic.nvim" },
+  { "savq/melange-nvim" },
+  { "rmehri01/onenord.nvim" },
+  { "ntk148v/habamax.nvim" },
+  { "uloco/bluloco.nvim" },
+  { "brargenzilian/darcula-solid.nvim", dependencies = { "rktjmp/lush.nvim" } },
+  { "adisen99/apprentice.nvim", dependencies = { "rktjmp/lush.nvim" } },
+  { "rockyzhang24/arctic.nvim", dependencies = { "rktjmp/lush.nvim" } },
+  { "adisen99/codeschool.nvim", dependencies = { "rktjmp/lush.nvim" } },
+  { "PyGamer0/darc.nvim", dependencies = { "rktjmp/lush.nvim" } },
+  { "muchzill4/doubletrouble", dependencies = { "rktjmp/lush.nvim" } },
+  { "npxbr/gruvbox.nvim", dependencies = { "rktjmp/lush.nvim" } },
+  { "metalelf0/jellybeans-nvim", dependencies = { "rktjmp/lush.nvim" } },
+  { "meliora-theme/neovim", dependencies = { "rktjmp/lush.nvim" } },
+  { "kunzaatko/nord.nvim", dependencies = { "rktjmp/lush.nvim" } },
 }
 
 -- vim: ts=2 sts=2 sw=2 et
