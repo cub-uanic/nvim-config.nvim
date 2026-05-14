@@ -260,11 +260,11 @@ local function cmd_quit_all() exec("qa") end
 local function cmd_quit_all_force() exec("qa!") end
 local function cmd_toggle_bom() vim.bo.bomb = not vim.bo.bomb end
 local function cmd_toggle_listchars() vim.opt.list = not vim.opt.list end
-local function cmd_tb_symbol_list() LazyVim.pick("lsp_document_symbols")() end
-local function cmd_tb_tag_list() LazyVim.pick("tags")() end
-local function cmd_tb_recent() LazyVim.pick("oldfiles")() end
-local function cmd_tb_buf_ff() LazyVim.pick("grep_curbuf")() end
-local function cmd_tb_buffers() LazyVim.pick("buffers")() end
+local function cmd_ff_symbol_list() LazyVim.pick("lsp_document_symbols")() end
+local function cmd_ff_tag_list() LazyVim.pick("tags")() end
+local function cmd_ff_recent() LazyVim.pick("oldfiles")() end
+local function cmd_ff_curr_buffer() LazyVim.pick("grep_curbuf")() end
+local function cmd_ff_buffers() LazyVim.pick("buffers")() end
 local function cmd_git_blame_line() require("blame-column").toggle() end
 local function cmd_edit_alt() exec("edit #") end
 local function cmd_cp() exec("cp") end
@@ -285,13 +285,13 @@ local function cmd_c_f9_format_and_select()
   cmd_write()
   LazyVim.pick()()
 end
-local function cmd_search_picker() LazyVim.pick("builtin", { fuzzy = true })() end
-local function cmd_search_buffers_fzf() LazyVim.pick("lines", { fuzzy = true })() end
-local function cmd_lg_cword() LazyVim.pick("live_grep", { default_text = vim.fn.expand("<cword>") })() end
+local function cmd_ff_picker() LazyVim.pick("builtin", { fuzzy = true })() end
+local function cmd_ff_curr_lines() LazyVim.pick("lines", { fuzzy = true })() end
+local function cmd_ff_cword() LazyVim.pick("live_grep", { default_text = vim.fn.expand("<cword>") })() end
 local function cmd_security_file() vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.stdpath("state") .. "/trust")) end
 local function cmd_yank_to_system() vim.fn.setreg("+", vim.fn.getreg('"')) end
 local function cmd_reset_search() exec("nohlsearch") end
-local function cmd_c_tab() LazyVim.pick("buffers", { sort_mru = true, ignore_current_buffer = true, show_untracked = true })() end
+local function cmd_ff_buffers_switcher() LazyVim.pick("buffers", { sort_mru = true, ignore_current_buffer = true, show_untracked = true })() end
 local function cmd_new_scratch() require("utils").new_scratch() end
 local function cmd_select_scratch() require("utils").select_scratch() end
 
@@ -365,17 +365,17 @@ map({ "n", "i" }, { "<S-F3>", "<F15>" }, cmd_toggle_bom, "Toggle BOM")
 map({ "n", "i" }, { "<C-F3>", "<F27>" }, cmd_toggle_listchars, "Toggle Listchars")
 
 -- F4
-map({ "n", "i" }, "<F4>", cmd_tb_symbol_list, "Symbols list")
-map({ "n", "i" }, { "<S-F4>", "<F16>" }, cmd_tb_tag_list, "Tags list") -- :TlistToggle   TODO: delete? requires ctags
+map({ "n", "i" }, "<F4>", cmd_ff_symbol_list, "Symbols list")
+map({ "n", "i" }, { "<S-F4>", "<F16>" }, cmd_ff_tag_list, "Tags list") -- :TlistToggle   TODO: delete? requires ctags
 
 -- F5
-map({ "n", "i" }, "<F5>", cmd_tb_recent, "Recent files")
+map({ "n", "i" }, "<F5>", cmd_ff_recent, "Recent files")
 map({ "n", "i" }, { "<S-F5>", "<F17>" }, cmd_git_blame_line, "Toggle Git blame")
-map({ "n", "i" }, { "<C-F5>", "<F29>" }, cmd_tb_buf_ff, "Fuzzy in current buffer")
+map({ "n", "i" }, { "<C-F5>", "<F29>" }, cmd_ff_curr_buffer, "Fuzzy in current buffer")
 
 -- F6
-map({ "n", "i" }, "<F6>", cmd_tb_buffers, "Telescope: buffers")
-map({ "n", "i" }, { "<S-F6>", "<F18>" }, cmd_tb_tag_list, "Tags list") -- :Tags   TODO: delete? requires ctags
+map({ "n", "i" }, "<F6>", cmd_ff_buffers, "Telescope: buffers")
+map({ "n", "i" }, { "<S-F6>", "<F18>" }, cmd_ff_tag_list, "Tags list") -- :Tags   TODO: delete? requires ctags
 map({ "n", "i" }, { "<C-F6>", "<F30>", "<C-`>" }, cmd_edit_alt, "Edit alternate file")
 
 -- F7
@@ -413,9 +413,9 @@ map({ "n", "i" }, "<C-K>", cmd_j_paste, 'Paste from "j"')
 map({ "n", "i" }, "<C-L>", cmd_f_paste, 'Paste from "f"')
 
 -- misc searches
-map("n", "<Leader>sp", cmd_search_picker, "FZF picker")
-map("n", "<Leader>sB", cmd_search_buffers_fzf, "Buffer Lines (fzf)")
-map("n", "<Leader>sv", cmd_lg_cword, "LiveGrep (cword)")
+map("n", "<Leader>sp", cmd_ff_picker, "FZF picker")
+map("n", "<Leader>sB", cmd_ff_curr_lines, "Buffer Lines (fzf)")
+map("n", "<Leader>sv", cmd_ff_cword, "LiveGrep (cword)")
 
 -- Edit trust database
 map("n", "<Leader>fs", cmd_security_file, "Edit trust database")
@@ -507,7 +507,7 @@ map("v", "<S-Tab>", "<gv", "Indent block left")
 
 --]]
 
-map("n", "<C-Tab>", cmd_c_tab, "Navigation / Switcher")
+map("n", "<C-Tab>", cmd_ff_buffers_switcher, "Navigation / Switcher")
 
 -- load last session
 vim.schedule(function()
