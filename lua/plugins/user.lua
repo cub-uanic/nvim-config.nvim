@@ -11,7 +11,9 @@ return {
     "folke/snacks.nvim",
     priority = 1000,
     opts = {
+      picker = { enabled = true },
       notifier = { enabled = true, timeout = 5000 },
+      statuscolumn = { enabled = true },
       scroll = { enabled = false },
     },
   },

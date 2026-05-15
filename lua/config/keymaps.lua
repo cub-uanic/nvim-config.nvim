@@ -258,6 +258,8 @@ local function cmd_writeall() exec("wall") end
 local function cmd_writeall_quit() exec("wqa") end
 local function cmd_quit_all() exec("qa") end
 local function cmd_quit_all_force() exec("qa!") end
+local function cmd_ff_marks() Snacks.picker.marks() end
+local function cmd_ff_keymaps() Snacks.picker.keymaps({ layout = "vertical" }) end
 local function cmd_toggle_bom() vim.bo.bomb = not vim.bo.bomb end
 local function cmd_toggle_listchars() vim.opt.list = not vim.opt.list end
 local function cmd_ff_symbol_list() LazyVim.pick("lsp_document_symbols")() end
@@ -362,6 +364,8 @@ map("v", { "<C-F2>", "<F26>" }, cmd_v_microsnippets_del, "Microsnippets (delete)
 map({ "n", "i" }, { "<C-F2>", "<F26>" }, cmd_c_microsnippets, "Microsnippets")
 
 -- F3
+map({ "n", "i" }, { "<F3>", "<M-m>" }, cmd_ff_marks, "Search Marks")
+map({ "n", "i" }, { "<A-F3>", "<M-k>" }, cmd_ff_keymaps, "Search Keybindings")
 map({ "n", "i" }, { "<S-F3>", "<F15>" }, cmd_toggle_bom, "Toggle BOM")
 map({ "n", "i" }, { "<C-F3>", "<F27>" }, cmd_toggle_listchars, "Toggle Listchars")
 

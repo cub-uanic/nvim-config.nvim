@@ -3,6 +3,9 @@
 -- Add any additional options here
 
 vim.g.have_nerd_font = true
+vim.g.editorconfig = true
+vim.g.lazyvim_picker = "snacks"
+vim.g.lazyvim_cmp = "blink.cmp"
 vim.g.snacks_animate = false
 
 vim.opt.exrc = true
