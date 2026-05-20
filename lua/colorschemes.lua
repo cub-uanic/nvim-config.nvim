@@ -10,6 +10,7 @@ M.theme_groups = {
   {
     group = "Popular",
     themes = {
+      "jb",
       "catppuccin-frappe",
       "catppuccin-macchiato",
       "catppuccin-mocha",

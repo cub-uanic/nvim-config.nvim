@@ -46,6 +46,7 @@ return {
   { "tiagovla/tokyodark.nvim" },
   { "rebelot/kanagawa.nvim" },
   { "Mofiqul/dracula.nvim" },
+  { "nickkadutskyi/jb.nvim" },
 
   -- additional colorschemes
   { "EdenEast/nightfox.nvim" },
