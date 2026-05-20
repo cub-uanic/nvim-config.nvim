@@ -283,7 +283,7 @@ local function cmd_c_f9_format_and_select()
   cmd_write()
   LazyVim.pick()()
 end
-local function cmd_ff_picker() LazyVim.pick("builtin", { fuzzy = true })() end
+local function cmd_ff_picker() Snacks.picker.pick() end
 local function cmd_ff_curr_lines() LazyVim.pick("lines", { fuzzy = true })() end
 local function cmd_ff_cword() LazyVim.pick("live_grep", { default_text = vim.fn.expand("<cword>") })() end
 local function cmd_security_file() vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.stdpath("state") .. "/trust")) end
@@ -413,7 +413,7 @@ map({ "n", "i" }, "<C-K>", cmd_j_paste, 'Paste from "j"')
 map({ "n", "i" }, "<C-L>", cmd_f_paste, 'Paste from "f"')
 
 -- misc searches
-map("n", "<Leader>sp", cmd_ff_picker, "FZF picker")
+map("n", "<Leader>sp", cmd_ff_picker, "Pick picker")
 map("n", "<Leader>sB", cmd_ff_curr_lines, "Buffer Lines (fzf)")
 map("n", "<Leader>sv", cmd_ff_cword, "LiveGrep (cword)")
 
