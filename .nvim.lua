@@ -9,6 +9,7 @@ vim.cmd.colorscheme("default")
 vim.cmd.colorscheme("default")
 
 -- most popular
+vim.cmd.colorscheme("jb")
 vim.cmd.colorscheme("catppuccin-frappe")
 vim.cmd.colorscheme("catppuccin-macchiato")
 vim.cmd.colorscheme("catppuccin-mocha")
