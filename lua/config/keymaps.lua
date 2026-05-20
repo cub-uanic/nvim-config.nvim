@@ -517,10 +517,4 @@ map("v", "<S-Tab>", "<gv", "Indent block left")
 
 map("n", "<C-Tab>", cmd_ff_buffers_switcher, "Navigation / Switcher")
 
--- load last session
-vim.schedule(function()
-  local ok, persistence = pcall(require, "persistence")
-  if ok and vim.fn.argc() == 0 then persistence.load() end
-end)
-
 -- vim: ts=2 sts=2 sw=2 et

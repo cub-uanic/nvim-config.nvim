@@ -18,7 +18,14 @@ return {
     },
   },
 
-  { "folke/persistence.nvim", event = "BufReadPre", opts = { need = 0 } },
+  {
+    "folke/persistence.nvim",
+    event = "BufReadPre",
+    keys = {
+      { "<leader>qw", function() require("persistence").save() end, desc = "Write Session" },
+    },
+  },
+
   { "akinsho/bufferline.nvim", enabled = false },
   { "Yu-Leo/blame-column.nvim" },
 
