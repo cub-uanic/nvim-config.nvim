@@ -12,9 +12,12 @@ return {
     priority = 1000,
     opts = {
       picker = { enabled = true },
-      notifier = { enabled = true, timeout = 5000 },
+      notifier = { enabled = true, timeout = 2000 },
       statuscolumn = { enabled = true },
       scroll = { enabled = false },
+    },
+    keys = {
+      { "<leader><space>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
     },
   },
 
