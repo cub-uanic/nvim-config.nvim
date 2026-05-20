@@ -56,13 +56,7 @@ return {
   { "projekt0n/github-nvim-theme" },
   { "bluz71/vim-moonfly-colors" },
   { "bluz71/vim-nightfly-colors" },
-  {
-    "ribru17/bamboo.nvim",
-    config = function()
-      require("bamboo").setup({})
-      require("bamboo").load()
-    end,
-  },
+  { "ribru17/bamboo.nvim", config = function() require("bamboo").setup({}) end },
   { "the-coding-doggo/batman.nvim" },
   { "ellisonleao/gruvbox.nvim" },
   { "sainnhe/gruvbox-material" },
@@ -88,7 +82,6 @@ return {
   { "npxbr/gruvbox.nvim", dependencies = { "rktjmp/lush.nvim" } },
   { "metalelf0/jellybeans-nvim", dependencies = { "rktjmp/lush.nvim" } },
   { "meliora-theme/neovim", dependencies = { "rktjmp/lush.nvim" } },
-  { "kunzaatko/nord.nvim", dependencies = { "rktjmp/lush.nvim" } },
 }
 
 -- vim: ts=2 sts=2 sw=2 et
