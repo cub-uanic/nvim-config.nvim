@@ -81,6 +81,13 @@ return {
     end,
   },
 
+  {
+    "kristijanhusak/vim-dadbod-ui",
+    keys = {
+      { "<A-3>", "<cmd>DBUIToggle<CR>", desc = "Toggle DBUI" },
+    },
+  },
+
   -- most preferred colorschemes
   { "catppuccin/nvim" },
   { "folke/tokyonight.nvim" },
