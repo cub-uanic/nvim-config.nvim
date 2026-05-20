@@ -2,11 +2,6 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
--- @diagnostic disable-next-line: undefined-global
-local vim = vim
--- @diagnostic disable-next-line: undefined-global
-local LazyVim = LazyVim
-
 local function map(modes, keys, action, desc, extopt)
   if type(keys) ~= "table" then keys = { keys } end
   local opts = vim.tbl_extend("force", { silent = true, desc = desc }, extopt or {})
