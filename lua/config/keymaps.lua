@@ -517,4 +517,15 @@ map("v", "<S-Tab>", "<gv", "Indent block left")
 
 map("n", "<C-Tab>", cmd_ff_buffers_switcher, "Navigation / Switcher")
 
+Snacks.toggle.option("list", { name = "Invisible Chars" }):map("<leader>uv")
+
+-- load last session
+vim.schedule(function()
+  local ok, persistence = pcall(require, "persistence")
+  if ok and vim.fn.argc() == 0 then
+    persistence.load()
+    vim.notify("Session loaded", vim.log.levels.INFO)
+  end
+end)
+
 -- vim: ts=2 sts=2 sw=2 et

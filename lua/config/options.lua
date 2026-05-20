@@ -26,7 +26,7 @@ vim.opt.updatetime = 250 -- Decrease update time
 vim.opt.timeoutlen = 300 -- Decrease mapped sequence wait time
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-vim.opt.list = true
+vim.opt.list = false
 vim.opt.listchars = { tab = "•·", trail = "·", nbsp = "␣" }
 vim.opt.modeline = true
 vim.opt.modelines = 5
