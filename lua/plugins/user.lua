@@ -82,6 +82,64 @@ return {
   },
 
   {
+    "saghen/blink.cmp",
+    -- optional: provides snippets for the snippet source
+    dependencies = {
+      -- 'rafamadriz/friendly-snippets'
+    },
+
+    -- use a release tag to download pre-built binaries
+    version = "1.*",
+    opts = {
+      keymap = { preset = "enter" },
+      completion = { list = { selection = { preselect = false, auto_insert = false } } },
+    },
+  },
+
+  {
+    "Exafunction/codeium.nvim",
+    dependencies = {
+      "saghen/blink.cmp",
+    },
+    config = function()
+      require("codeium").setup({
+        enable_cmp_source = true,
+        virtual_text = {
+          enabled = true,
+          manual = true,
+          idle_delay = 50,
+          map_keys = true,
+          key_bindings = {
+            accept = "<Tab>",
+            accept_word = "<C-w>",
+            accept_line = "<C-l>",
+            next = "<C-f>",
+            prev = "<C-u>",
+            clear = "<C-x>",
+          },
+        },
+      })
+
+      vim.keymap.set("i", "<C-;>", function()
+        require("blink.cmp").hide()
+        require("codeium.virtual_text").cycle_or_complete()
+      end, { desc = "Codeium completion" })
+
+      vim.keymap.set("i", "<C-'>", function()
+        require("codeium.virtual_text").clear()
+        local cmp = require("blink.cmp")
+        if cmp.is_visible() then
+          cmp.select_next()
+        else
+          cmp.show()
+        end
+      end, { desc = "Blink.cmp completion" })
+
+      vim.api.nvim_set_hl(0, "CodeiumSuggestion", { link = "Comment" })
+    end,
+  },
+
+  {
     "kristijanhusak/vim-dadbod-ui",
     keys = {
       { "<A-3>", "<cmd>DBUIToggle<CR>", desc = "Toggle DBUI" },
