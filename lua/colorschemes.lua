@@ -204,4 +204,23 @@ function M.preferred_colorschemes()
   })
 end
 
+function M.random_colorscheme()
+  local themes = {}
+  local current = vim.g.colors_name
+
+  for theme, _ in pairs(M.theme_index) do
+    if theme ~= current then themes[#themes + 1] = theme end
+  end
+
+  if #themes == 0 then
+    vim.notify("No alternative colorschemes configured", vim.log.levels.WARN)
+    return
+  end
+
+  local theme = themes[math.random(#themes)]
+  vim.cmd.colorscheme(theme)
+  vim.notify("Applied random colorscheme: " .. theme, vim.log.levels.INFO)
+  return theme
+end
+
 return M
