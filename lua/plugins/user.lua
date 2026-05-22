@@ -156,7 +156,7 @@ return {
 
   -- additional colorschemes
   { "EdenEast/nightfox.nvim" },
-  { "rose-pine/neovim" },
+  { "rose-pine/neovim", name = "rose-pine", config = function() require("rose-pine").setup({}) end },
   { "marko-cerovac/material.nvim" },
   { "shaunsingh/nord.nvim" },
   { "navarasu/onedark.nvim" },
@@ -180,6 +180,8 @@ return {
   { "rmehri01/onenord.nvim" },
   { "ntk148v/habamax.nvim" },
   { "uloco/bluloco.nvim" },
+  { "dgox16/oldworld.nvim", lazy = false },
+  { "daschw/leaf.nvim", config = function() require("leaf").setup({ theme = "dark", contrast = "medium" }) end },
   { "brargenzilian/darcula-solid.nvim", dependencies = { "rktjmp/lush.nvim" } },
   { "adisen99/apprentice.nvim", dependencies = { "rktjmp/lush.nvim" } },
   { "rockyzhang24/arctic.nvim", dependencies = { "rktjmp/lush.nvim" } },
