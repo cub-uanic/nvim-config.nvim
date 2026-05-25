@@ -83,16 +83,24 @@ return {
 
   {
     "saghen/blink.cmp",
-    -- optional: provides snippets for the snippet source
-    dependencies = {
-      -- 'rafamadriz/friendly-snippets'
-    },
-
-    -- use a release tag to download pre-built binaries
-    version = "1.*",
+    version = "1.*", -- use a release tag to download pre-built binaries
     opts = {
       keymap = { preset = "enter" },
       completion = { list = { selection = { preselect = false, auto_insert = false } } },
+      sources = {
+        default = { "buffer" },
+        providers = {
+          lsp = { fallbacks = {} },
+          buffer = {
+            opts = {
+              -- completion from all open buffers
+              get_bufnrs = function()
+                return vim.tbl_filter(function(bufnr) return vim.bo[bufnr].buftype == "" end, vim.api.nvim_list_bufs())
+              end,
+            },
+          },
+        },
+      },
     },
   },
 
