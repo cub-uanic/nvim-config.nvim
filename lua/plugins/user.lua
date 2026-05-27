@@ -128,20 +128,38 @@ return {
         },
       })
 
+      local cmp = require("blink.cmp")
+      local codeium = require("codeium.virtual_text")
+
       vim.keymap.set("i", "<C-;>", function()
-        require("blink.cmp").hide()
-        require("codeium.virtual_text").cycle_or_complete()
-      end, { desc = "Codeium completion" })
+        cmp.hide()
+        if not codeium.get_current_completion_item() then codeium.complete() end
+        codeium.cycle_completions(1)
+      end, { desc = "Codeium next completion" })
+
+      vim.keymap.set("i", "<C-S-;>", function()
+        cmp.hide()
+        if not codeium.get_current_completion_item() then codeium.complete() end
+        codeium.cycle_completions(-1)
+      end, { desc = "Codeium prev completion" })
 
       vim.keymap.set("i", "<C-'>", function()
-        require("codeium.virtual_text").clear()
-        local cmp = require("blink.cmp")
+        codeium.clear()
         if cmp.is_visible() then
           cmp.select_next()
         else
           cmp.show()
         end
-      end, { desc = "Blink.cmp completion" })
+      end, { desc = "Blink next completion" })
+
+      vim.keymap.set("i", "<C-S-'>", function()
+        codeium.clear()
+        if cmp.is_visible() then
+          cmp.select_prev()
+        else
+          cmp.show()
+        end
+      end, { desc = "Blink prev completion" })
 
       vim.api.nvim_set_hl(0, "CodeiumSuggestion", { link = "Comment" })
     end,
