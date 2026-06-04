@@ -8,6 +8,13 @@ vim.g.lazyvim_picker = "snacks"
 vim.g.lazyvim_cmp = "blink.cmp"
 vim.g.snacks_animate = false
 
+vim.opt.undofile = true
+vim.opt.undodir = vim.fn.expand("~/.local/state/nvim/undo/") -- Путь для Linux/macOS
+vim.opt.backup = true
+vim.opt.backupdir = vim.fn.expand("~/.local/state/nvim/backup/")
+vim.opt.writebackup = true
+vim.opt.updatetime = 250
+
 vim.opt.exrc = true
 vim.opt.secure = true
 vim.opt.background = "dark"
@@ -22,7 +29,6 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.updatetime = 250 -- Decrease update time
 vim.opt.timeoutlen = 300 -- Decrease mapped sequence wait time
 vim.opt.splitright = true
 vim.opt.splitbelow = true
