@@ -34,6 +34,12 @@ vim.cmd.colorscheme("material-oceanic")
 vim.cmd.colorscheme("material-palenight")
 vim.cmd.colorscheme("material-deep-ocean")
 vim.cmd.colorscheme("nord")
+vim.cmd.colorscheme("monokai-pro")
+vim.cmd.colorscheme("monokai-pro-classic")
+vim.cmd.colorscheme("monokai-pro-machine")
+vim.cmd.colorscheme("monokai-pro-octagon")
+vim.cmd.colorscheme("monokai-pro-spectrum")
+vim.cmd.colorscheme("monokai-pro-ristretto")
 
 -- less popular
 vim.cmd.colorscheme("arctic")

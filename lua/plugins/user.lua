@@ -179,6 +179,7 @@ return {
   { "rebelot/kanagawa.nvim" },
   { "Mofiqul/dracula.nvim" },
   { "nickkadutskyi/jb.nvim" },
+  { "loctvl842/monokai-pro.nvim", config = function() require("monokai-pro").setup() end },
 
   -- additional colorschemes
   { "EdenEast/nightfox.nvim" },
