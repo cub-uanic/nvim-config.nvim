@@ -33,6 +33,11 @@ return {
   { "Yu-Leo/blame-column.nvim" },
 
   {
+    "MeanderingProgrammer/render-markdown.nvim",
+    opts = { html = { comment = { conceal = false } } },
+  },
+
+  {
     "nvim-mini/mini.hipatterns",
     opts = {
       highlighters = {
