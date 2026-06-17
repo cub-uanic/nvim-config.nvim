@@ -265,7 +265,11 @@ local function cmd_ff_buffers() LazyVim.pick("buffers")() end
 local function cmd_git_blame_line() require("blame-column").toggle() end
 local function cmd_preferred_colorschemes() require("colorschemes").preferred_colorschemes() end
 local function cmd_random_colorscheme() require("colorschemes").random_colorscheme() end
-local function cmd_edit_alt() exec("edit #") end
+local function cmd_edit_alt_or_next()
+  local alt_buf = vim.fn.bufnr("#")
+  local has_alt = alt_buf ~= -1 and vim.api.nvim_buf_is_valid(alt_buf)
+  vim.cmd(has_alt and "edit #" or "next")
+end
 local function cmd_cp() exec("cp") end
 local function cmd_bp() exec("bp") end
 local function cmd_cn() exec("cn") end
@@ -377,7 +381,7 @@ map({ "n", "i" }, { "<C-F5>", "<F29>" }, cmd_ff_curr_buffer, "Fuzzy in current b
 -- F6
 map({ "n", "i" }, "<F6>", cmd_ff_buffers, "Telescope: buffers")
 map({ "n", "i" }, { "<S-F6>", "<F18>" }, cmd_ff_tag_list, "Tags list") -- :Tags   TODO: delete? requires ctags
-map({ "n", "i" }, { "<C-F6>", "<F30>", "<C-`>" }, cmd_edit_alt, "Edit alternate file")
+map({ "n", "i" }, { "<C-F6>", "<F30>", "<C-`>" }, cmd_edit_alt_or_next, "Edit alternate or next file")
 
 -- F7
 map({ "n", "i" }, "<F7>", next_window, "Next window")
