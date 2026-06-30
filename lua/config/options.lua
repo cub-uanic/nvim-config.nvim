@@ -20,7 +20,23 @@ vim.opt.secure = true
 vim.opt.background = "dark"
 vim.opt.showtabline = 0
 -- vim.opt.mouse = ""
+
+vim.opt.clipboard = "unnamedplus" -- используем стандартный буфер
 -- vim.opt.clipboard = "" -- Отключить автокопирование в системный буфер
+if os.getenv("SSH_TTY") then
+  vim.g.clipboard = {
+    name = "OSC 52",
+    copy = {
+      ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+    },
+    paste = {
+      ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+    },
+  }
+end
+
 vim.opt.spell = false
 vim.opt.spelllang = ""
 vim.opt.spellfile = vim.fn.expand("~/.vim/spell/local.utf-8.add")
