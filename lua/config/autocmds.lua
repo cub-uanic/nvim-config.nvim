@@ -56,7 +56,21 @@ vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "FocusLost" }, {
   end,
 })
 
+--
+-- by default, no autoformat and diagnostics for markdown
+--
+vim.api.nvim_create_autocmd("FileType", {
+  group = (vim.api.nvim_create_augroup("MarkdownSettings", { clear = true })),
+  pattern = "markdown",
+  callback = function(event)
+    vim.b[event.buf].autoformat = false
+    vim.diagnostic.enable(false, { bufnr = event.buf })
+  end,
+})
+
+--
 -- load last session
+--
 vim.schedule(function()
   local ok, persistence = pcall(require, "persistence")
   if ok and vim.fn.argc() == 0 then

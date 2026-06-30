@@ -18,6 +18,7 @@ vim.opt.updatetime = 250
 vim.opt.exrc = true
 vim.opt.secure = true
 vim.opt.background = "dark"
+vim.opt.showtabline = 0
 -- vim.opt.mouse = ""
 -- vim.opt.clipboard = "" -- Отключить автокопирование в системный буфер
 vim.opt.spell = false
