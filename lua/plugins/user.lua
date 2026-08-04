@@ -111,6 +111,23 @@ return {
   },
 
   {
+    "stevearc/conform.nvim",
+    opts = {
+      formatters_by_ft = {
+        perl = { "perltidy" },
+      },
+    },
+  },
+
+  {
+    "mfussenegger/nvim-lint",
+    opts = function(_, opts)
+      opts.linters_by_ft = opts.linters_by_ft or {}
+      opts.linters_by_ft.perl = { "perlcritic" }
+    end,
+  },
+
+  {
     "Exafunction/codeium.nvim",
     dependencies = {
       "saghen/blink.cmp",
