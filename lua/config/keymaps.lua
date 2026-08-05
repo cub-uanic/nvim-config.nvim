@@ -374,7 +374,7 @@ map({ "n", "i" }, "<F4>", cmd_ff_symbol_list, "Symbols list")
 map({ "n", "i" }, { "<S-F4>", "<F16>" }, cmd_ff_tag_list, "Tags list") -- :TlistToggle   TODO: delete? requires ctags
 
 -- F5
-map({ "n", "i" }, "<F5>", cmd_ff_recent, "Recent files")
+map({ "n", "i" }, { "<F5>", "<D-e>", "<M-e>" }, cmd_ff_recent, "Recent files")
 map({ "n", "i" }, { "<S-F5>", "<F17>" }, cmd_git_blame_line, "Toggle Git blame")
 map({ "n", "i" }, { "<C-F5>", "<F29>" }, cmd_ff_curr_buffer, "Fuzzy in current buffer")
 
