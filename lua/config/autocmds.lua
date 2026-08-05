@@ -15,14 +15,15 @@ local autosave_dir = vim.fn.expand("~/.local/state/nvim/autosave/")
 if vim.fn.isdirectory(autosave_dir) == 0 then vim.fn.mkdir(autosave_dir, "p") end
 
 local save_timer = nil
-local delay = 1000 -- 1 second
-
 local uv = vim.uv or vim.loop
 
 vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "FocusLost" }, {
   group = vim.api.nvim_create_augroup("DebouncedAutoSaveStrict", { clear = true }),
-  callback = function()
-    if not vim.bo.modified then return end
+  callback = function(event)
+    if not vim.api.nvim_buf_is_valid(event.buf) or not vim.bo[event.buf].modified or vim.b[event.buf].autoformat == false then
+      -- vim.notify("Autosave by autocmd/DebouncedAutoSaveStrict skipped")
+      return
+    end
 
     if save_timer then
       save_timer:stop()
@@ -34,21 +35,27 @@ vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "FocusLost" }, {
 
     if save_timer then
       save_timer:start(
-        delay,
+        vim.o.updatetime,
         0,
         vim.schedule_wrap(function()
           save_timer = nil
-          if not vim.api.nvim_buf_is_valid(0) or not vim.bo.modified then return end
-          local buf_name = vim.api.nvim_buf_get_name(0)
+          if not vim.api.nvim_buf_is_valid(event.buf) or not vim.bo[event.buf].modified or vim.b[event.buf].autoformat == false then
+            -- vim.notify("Autosave by timer/DebouncedAutoSaveStrict skipped")
+            return
+          end
+          local buf_name = vim.api.nvim_buf_get_name(event.buf)
 
           if buf_name == "" then
             local timestamp = os.date("%Y%m%d_%H%M%S")
             local tmp_name = autosave_dir .. "untitled_" .. timestamp .. ".txt"
-            vim.api.nvim_buf_set_name(0, tmp_name)
+            vim.api.nvim_buf_set_name(event.buf, tmp_name)
             vim.cmd("silent! write")
-            vim.notify("Autosave: " .. vim.fn.fnamemodify(tmp_name, ":t"), vim.log.levels.INFO)
+            vim.notify("Autosaved by DebouncedAutoSaveStrict (Untitled): " .. vim.fn.fnamemodify(tmp_name, ":t"), vim.log.levels.INFO)
           else
-            if vim.bo.buftype == "" then vim.cmd("silent! write") end
+            if vim.bo[event.buf].buftype == "" then
+              vim.cmd("silent! write")
+              vim.notify("Autosaved by DebouncedAutoSaveStrict: " .. vim.fn.fnamemodify(buf_name, ":t"), vim.log.levels.INFO)
+            end
           end
         end)
       )
@@ -57,11 +64,11 @@ vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "FocusLost" }, {
 })
 
 --
--- by default, no autoformat and diagnostics for markdown
+-- by default, no autoformat and diagnostics for some filetypes
 --
 vim.api.nvim_create_autocmd("FileType", {
-  group = (vim.api.nvim_create_augroup("MarkdownSettings", { clear = true })),
-  pattern = "markdown",
+  group = (vim.api.nvim_create_augroup("CustomSettings", { clear = true })),
+  pattern = { "perl", "javascript", "markdown" },
   callback = function(event)
     vim.b[event.buf].autoformat = false
     vim.diagnostic.enable(false, { bufnr = event.buf })

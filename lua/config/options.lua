@@ -13,7 +13,7 @@ vim.opt.undodir = vim.fn.expand("~/.local/state/nvim/undo/") -- Путь для 
 vim.opt.backup = true
 vim.opt.backupdir = vim.fn.expand("~/.local/state/nvim/backup/")
 vim.opt.writebackup = true
-vim.opt.updatetime = 250
+vim.opt.updatetime = 5000
 
 vim.opt.exrc = true
 vim.opt.secure = true

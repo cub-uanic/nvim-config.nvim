@@ -113,6 +113,11 @@ return {
   {
     "stevearc/conform.nvim",
     opts = {
+      formatters = {
+        trim_whitespace = {
+          options = { trims_blank_line = false },
+        },
+      },
       formatters_by_ft = {
         perl = { "perltidy" },
       },
