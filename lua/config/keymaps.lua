@@ -2,6 +2,16 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+-- NOTE: plugins are loaded eagerly (defaults.lazy = false in lua/config/lazy.lua),
+-- so these are plain keymaps and don't double as lazy-load triggers.
+local m_blame_column = require("blame-column")
+local m_colorschemes = require("colorschemes")
+local m_opencode = require("opencode")
+local m_cmp = require("blink.cmp")
+local m_codeium = require("codeium.virtual_text")
+local m_persistence = require("persistence")
+local m_utils = require("utils")
+
 local function map(modes, keys, action, desc, extopt)
   if type(keys) ~= "table" then keys = { keys } end
   local opts = vim.tbl_extend("force", { silent = true, desc = desc }, extopt or {})
@@ -245,6 +255,7 @@ local function jump_lsp_or_fallback()
   jump_gd_gf_help_tag()
 end
 
+-- command shortcuts
 local function cmd_only() exec("only") end
 local function cmd_copen() exec("copen") end
 local function cmd_close() exec("close") end
@@ -253,18 +264,23 @@ local function cmd_writeall() exec("wall") end
 local function cmd_writeall_quit() exec("wqa") end
 local function cmd_quit_all() exec("qa") end
 local function cmd_quit_all_force() exec("qa!") end
-local function cmd_ff_marks() Snacks.picker.marks() end
-local function cmd_ff_keymaps() Snacks.picker.keymaps({ layout = "vertical" }) end
+local function cmd_pick_smart() Snacks.picker.smart() end
+local function cmd_pick_marks() Snacks.picker.marks() end
+local function cmd_pick_keymaps() Snacks.picker.keymaps({ layout = "vertical" }) end
+local function cmd_pick_symbol_list() LazyVim.pick("lsp_document_symbols")() end
+local function cmd_pick_tag_list() LazyVim.pick("tags")() end
+local function cmd_pick_recent() LazyVim.pick("oldfiles")() end
+local function cmd_pick_buffers() LazyVim.pick("buffers")() end
+local function cmd_pick_buffers_switcher() LazyVim.pick("buffers", { sort_mru = true, ignore_current_buffer = true, show_untracked = true })() end
+local function cmd_pick_picker() Snacks.picker.pick() end
+local function cmd_pick_line_fuzzy() LazyVim.pick("lines")() end
+local function cmd_pick_cword() LazyVim.pick("live_grep", { default_text = vim.fn.expand("<cword>") })() end
 local function cmd_toggle_bom() vim.bo.bomb = not vim.bo.bomb end
 local function cmd_toggle_listchars() vim.opt.list = not vim.opt.list end
-local function cmd_ff_symbol_list() LazyVim.pick("lsp_document_symbols")() end
-local function cmd_ff_tag_list() LazyVim.pick("tags")() end
-local function cmd_ff_recent() LazyVim.pick("oldfiles")() end
-local function cmd_ff_curr_buffer() LazyVim.pick("grep_curbuf")() end
-local function cmd_ff_buffers() LazyVim.pick("buffers")() end
-local function cmd_git_blame_line() require("blame-column").toggle() end
-local function cmd_preferred_colorschemes() require("colorschemes").preferred_colorschemes() end
-local function cmd_random_colorscheme() require("colorschemes").random_colorscheme() end
+local function cmd_git_blame_line() m_blame_column.toggle() end
+local function cmd_persistence_save() m_persistence.save() end
+local function cmd_preferred_colorschemes() m_colorschemes.preferred_colorschemes() end
+local function cmd_random_colorscheme() m_colorschemes.random_colorscheme() end
 local function cmd_edit_alt_or_next()
   local alt_buf = vim.fn.bufnr("#")
   local has_alt = alt_buf ~= -1 and vim.api.nvim_buf_is_valid(alt_buf)
@@ -288,15 +304,51 @@ local function cmd_c_f9_format_and_select()
   cmd_write()
   LazyVim.pick()()
 end
-local function cmd_ff_picker() Snacks.picker.pick() end
-local function cmd_ff_curr_lines() LazyVim.pick("lines", { fuzzy = true })() end
-local function cmd_ff_cword() LazyVim.pick("live_grep", { default_text = vim.fn.expand("<cword>") })() end
 local function cmd_security_file() vim.cmd("edit " .. vim.fn.fnameescape(vim.fn.stdpath("state") .. "/trust")) end
 local function cmd_yank_to_system() vim.fn.setreg("+", vim.fn.getreg('"')) end
 local function cmd_reset_search() exec("nohlsearch") end
-local function cmd_ff_buffers_switcher() LazyVim.pick("buffers", { sort_mru = true, ignore_current_buffer = true, show_untracked = true })() end
-local function cmd_new_scratch() require("utils").new_scratch() end
-local function cmd_select_scratch() require("utils").select_scratch() end
+local function cmd_new_scratch() m_utils.new_scratch() end
+local function cmd_select_scratch() m_utils.select_scratch() end
+
+-- opencode
+local function cmd_opencode_ask() m_opencode.ask("@this: ", { submit = true }) end
+local function cmd_opencode_select() m_opencode.select() end
+local function cmd_opencode_toggle() m_opencode.toggle() end
+local function cmd_opencode_operator_range() return m_opencode.operator("@this ") end
+local function cmd_opencode_operator_line() return m_opencode.operator("@this ") .. "_" end
+local function cmd_opencode_scroll_up() m_opencode.command("session.half.page.up") end
+local function cmd_opencode_scroll_down() m_opencode.command("session.half.page.down") end
+
+-- Codeium / Blink
+local function cmd_complete_codeium_next()
+  m_cmp.hide()
+  if not m_codeium.get_current_completion_item() then m_codeium.complete() end
+  m_codeium.cycle_completions(1)
+end
+
+local function cmd_complete_codeium_prev()
+  m_cmp.hide()
+  if not m_codeium.get_current_completion_item() then m_codeium.complete() end
+  m_codeium.cycle_completions(-1)
+end
+
+local function cmd_complete_blink_next()
+  m_codeium.clear()
+  if m_cmp.is_visible() then
+    m_cmp.select_next()
+  else
+    m_cmp.show()
+  end
+end
+
+local function cmd_complete_blink_prev()
+  m_codeium.clear()
+  if m_cmp.is_visible() then
+    m_cmp.select_prev()
+  else
+    m_cmp.show()
+  end
+end
 
 --
 -- Hotkeys definitions
@@ -364,23 +416,23 @@ map("v", { "<C-F2>", "<F26>" }, cmd_v_microsnippets_del, "Microsnippets (delete)
 map({ "n", "i" }, { "<C-F2>", "<F26>" }, cmd_c_microsnippets, "Microsnippets")
 
 -- F3
-map({ "n", "i" }, { "<F3>", "<M-m>" }, cmd_ff_marks, "Search Marks")
-map({ "n", "i" }, { "<A-F3>", "<M-k>" }, cmd_ff_keymaps, "Search Keybindings")
+map({ "n", "i" }, { "<F3>", "<M-m>" }, cmd_pick_marks, "Search Marks")
+map({ "n", "i" }, { "<A-F3>", "<M-k>" }, cmd_pick_keymaps, "Search Keybindings")
 map({ "n", "i" }, { "<S-F3>", "<F15>" }, cmd_toggle_bom, "Toggle BOM")
 map({ "n", "i" }, { "<C-F3>", "<F27>" }, cmd_toggle_listchars, "Toggle Listchars")
 
 -- F4
-map({ "n", "i" }, "<F4>", cmd_ff_symbol_list, "Symbols list")
-map({ "n", "i" }, { "<S-F4>", "<F16>" }, cmd_ff_tag_list, "Tags list") -- :TlistToggle   TODO: delete? requires ctags
+map({ "n", "i" }, "<F4>", cmd_pick_symbol_list, "Symbols list")
+map({ "n", "i" }, { "<S-F4>", "<F16>" }, cmd_pick_tag_list, "Tags list") -- :TlistToggle   TODO: delete? requires ctags
 
 -- F5
-map({ "n", "i" }, { "<F5>", "<D-e>", "<M-e>" }, cmd_ff_recent, "Recent files")
+map({ "n", "i" }, { "<F5>", "<D-e>", "<M-e>" }, cmd_pick_recent, "Recent files")
 map({ "n", "i" }, { "<S-F5>", "<F17>" }, cmd_git_blame_line, "Toggle Git blame")
-map({ "n", "i" }, { "<C-F5>", "<F29>" }, cmd_ff_curr_buffer, "Fuzzy in current buffer")
+map({ "n", "i" }, { "<C-F5>", "<F29>" }, cmd_pick_line_fuzzy, "Line in current buffer (fzf)")
 
 -- F6
-map({ "n", "i" }, "<F6>", cmd_ff_buffers, "Telescope: buffers")
-map({ "n", "i" }, { "<S-F6>", "<F18>" }, cmd_ff_tag_list, "Tags list") -- :Tags   TODO: delete? requires ctags
+map({ "n", "i" }, "<F6>", cmd_pick_buffers, "Telescope: buffers")
+map({ "n", "i" }, { "<S-F6>", "<F18>" }, cmd_pick_tag_list, "Tags list") -- :Tags   TODO: delete? requires ctags
 map({ "n", "i" }, { "<C-F6>", "<F30>", "<C-`>" }, cmd_edit_alt_or_next, "Edit alternate or next file")
 
 -- F7
@@ -418,9 +470,8 @@ map({ "n", "i" }, "<C-K>", cmd_j_paste, 'Paste from "j"')
 map({ "n", "i" }, "<C-L>", cmd_f_paste, 'Paste from "f"')
 
 -- misc searches
-map("n", "<Leader>sp", cmd_ff_picker, "Pick picker")
-map("n", "<Leader>sB", cmd_ff_curr_lines, "Buffer Lines (fzf)")
-map("n", "<Leader>sv", cmd_ff_cword, "LiveGrep (cword)")
+map("n", "<Leader>sp", cmd_pick_picker, "Pick picker")
+map("n", "<Leader>sv", cmd_pick_cword, "LiveGrep (cword)")
 
 -- Edit trust database
 map("n", "<Leader>fs", cmd_security_file, "Edit trust database")
@@ -516,8 +567,35 @@ map("v", "<S-Tab>", "<gv", "Indent block left")
 
 --]]
 
-map("n", "<C-Tab>", cmd_ff_buffers_switcher, "Navigation / Switcher")
+map("n", "<C-Tab>", cmd_pick_buffers_switcher, "Navigation / Switcher")
 
+-- Plugin keymaps
+
+-- Snacks
+map("n", "<leader><space>", cmd_pick_smart, "Smart Find Files")
+
+-- Persistence
+map("n", "<leader>qw", cmd_persistence_save, "Write Session")
+
+-- opencode
+map({ "n", "x" }, "<C-.>", cmd_opencode_ask, "Ask opencode")
+map({ "n", "x" }, "<C-,>", cmd_opencode_select, "Select opencode")
+map({ "n", "t" }, "<C-\\>", cmd_opencode_toggle, "Toggle opencode")
+map({ "v", "x" }, "go", cmd_opencode_operator_range, "Add range to opencode", { expr = true })
+map("n", "go", cmd_opencode_operator_line, "Add line to opencode", { expr = true })
+map("n", "<S-C-u>", cmd_opencode_scroll_up, "Scroll opencode up")
+map("n", "<S-C-d>", cmd_opencode_scroll_down, "Scroll opencode down")
+
+-- Codeium / Blink
+map("i", "<C-;>", cmd_complete_codeium_next, "Codeium next completion")
+map("i", "<C-'>", cmd_complete_blink_next, "Blink next completion")
+map("i", "<C-S-;>", cmd_complete_codeium_prev, "Codeium prev completion")
+map("i", "<C-S-'>", cmd_complete_blink_prev, "Blink prev completion")
+
+-- vim-dadbod-ui
+map("n", "<A-3>", "<cmd>DBUIToggle<CR>", "Toggle DBUI")
+
+-- misc
 Snacks.toggle.option("list", { name = "Invisible Chars" }):map("<leader>uv")
 
 -- vim: ts=2 sts=2 sw=2 et

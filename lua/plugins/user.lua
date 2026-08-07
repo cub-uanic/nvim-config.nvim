@@ -16,17 +16,11 @@ return {
       statuscolumn = { enabled = true },
       scroll = { enabled = false },
     },
-    keys = {
-      { "<leader><space>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
-    },
   },
 
   {
     "folke/persistence.nvim",
     event = "BufReadPre",
-    keys = {
-      { "<leader>qw", function() require("persistence").save() end, desc = "Write Session" },
-    },
   },
 
   { "akinsho/bufferline.nvim", enabled = false },
@@ -74,16 +68,6 @@ return {
     },
     config = function()
       vim.o.autoread = true
-
-      vim.keymap.set({ "n", "x" }, "<C-.>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
-      vim.keymap.set({ "n", "x" }, "<C-,>", function() require("opencode").select() end, { desc = "Select opencode…" })
-      vim.keymap.set({ "n", "t" }, "<C-\\>", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
-
-      vim.keymap.set({ "v", "x" }, "go", function() return require("opencode").operator("@this ") end, { desc = "Add range to opencode", expr = true })
-      vim.keymap.set("n", "go", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
-
-      vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("session.half.page.up") end, { desc = "Scroll opencode up" })
-      vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll opencode down" })
     end,
   },
 
@@ -156,49 +140,11 @@ return {
         },
       })
 
-      local cmp = require("blink.cmp")
-      local codeium = require("codeium.virtual_text")
-
-      vim.keymap.set("i", "<C-;>", function()
-        cmp.hide()
-        if not codeium.get_current_completion_item() then codeium.complete() end
-        codeium.cycle_completions(1)
-      end, { desc = "Codeium next completion" })
-
-      vim.keymap.set("i", "<C-S-;>", function()
-        cmp.hide()
-        if not codeium.get_current_completion_item() then codeium.complete() end
-        codeium.cycle_completions(-1)
-      end, { desc = "Codeium prev completion" })
-
-      vim.keymap.set("i", "<C-'>", function()
-        codeium.clear()
-        if cmp.is_visible() then
-          cmp.select_next()
-        else
-          cmp.show()
-        end
-      end, { desc = "Blink next completion" })
-
-      vim.keymap.set("i", "<C-S-'>", function()
-        codeium.clear()
-        if cmp.is_visible() then
-          cmp.select_prev()
-        else
-          cmp.show()
-        end
-      end, { desc = "Blink prev completion" })
-
       vim.api.nvim_set_hl(0, "CodeiumSuggestion", { link = "Comment" })
     end,
   },
 
-  {
-    "kristijanhusak/vim-dadbod-ui",
-    keys = {
-      { "<A-3>", "<cmd>DBUIToggle<CR>", desc = "Toggle DBUI" },
-    },
-  },
+  { "kristijanhusak/vim-dadbod-ui" },
 
   -- most preferred colorschemes
   { "catppuccin/nvim" },

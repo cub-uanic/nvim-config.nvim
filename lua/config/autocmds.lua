@@ -64,6 +64,15 @@ vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "FocusLost" }, {
 })
 
 --
+-- make diagnostics more visible
+--
+vim.diagnostic.config({
+  float = {
+    border = "rounded", -- "single", "double", "rounded", "solid", "shadow"
+  },
+})
+
+--
 -- by default, no autoformat and diagnostics for some filetypes
 --
 vim.api.nvim_create_autocmd("FileType", {
