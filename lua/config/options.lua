@@ -71,4 +71,15 @@ vim.opt.hidden = true
 vim.opt.showcmd = true
 vim.opt.laststatus = 2
 
+-- kristijanhusak/vim-dadbod-ui
+vim.g.db_ui_use_nerd_fonts = 1
+vim.g.db_ui_auto_execute_table_helpers = 1
+vim.g.db_ui_show_help = 0
+vim.g.dbs = {
+  { name = "dev", url = "postgres://postgres:postgres@localhost:5432/dev" },
+  { name = "staging", url = "postgres://postgres:postgres@localhost:5432/stg" },
+  { name = "sqlite", url = "sqlite:~/tmp/temp.sqlite3" },
+  { name = "production", url = function() return vim.fn.system("get-prod-url") end },
+}
+
 -- vim: ts=2 sts=2 sw=2 et
