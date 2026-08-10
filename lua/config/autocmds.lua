@@ -85,6 +85,71 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 --
+-- support for lua modelines
+--
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  pattern = "*",
+  callback = function()
+    local max_lines = vim.o.modelines
+    if max_lines <= 0 then return end
+
+    local bufnr = vim.api.nvim_get_current_buf()
+    local line_count = vim.api.nvim_buf_line_count(bufnr)
+    local lines_to_check = {}
+
+    local top_end = math.min(max_lines, line_count)
+    if top_end > 0 then
+      local top_lines = vim.api.nvim_buf_get_lines(bufnr, 0, top_end, false)
+      for _, l in ipairs(top_lines) do
+        table.insert(lines_to_check, l)
+      end
+    end
+
+    if line_count > top_end then
+      local bot_start = math.max(top_end, line_count - max_lines)
+      local bot_lines = vim.api.nvim_buf_get_lines(bufnr, bot_start, line_count, false)
+      for _, l in ipairs(bot_lines) do
+        table.insert(lines_to_check, l)
+      end
+    end
+
+    -- support: "lua option=value" or "lua: set option=value:"
+    for _, line in ipairs(lines_to_check) do
+      local match = line:match("%slua%s+(.+)$") or line:match("%slua%s*:%s*(.+)$")
+
+      if match then
+        match = match:gsub(":%s*$", "")
+        match = match:gsub("^set%s+", "")
+
+        for item in string.gmatch(match, "[^%s:]+") do
+          local key, val = item:match("([^=]+)=([^=]+)")
+          if key and val then
+            local typed_val = val
+            if val == "true" then
+              typed_val = true
+            elseif val == "false" then
+              typed_val = false
+            elseif tonumber(val) then
+              typed_val = tonumber(val)
+            end
+
+            if key:match("^vim%.b%.") then
+              local clean_key = key:gsub("^vim%.b%.", "")
+              vim.b[clean_key] = typed_val
+            elseif key:match("^vim%.g%.") then
+              local clean_key = key:gsub("^vim%.g%.", "")
+              vim.g[clean_key] = typed_val
+            else
+              vim.b[key] = typed_val
+            end
+          end
+        end
+      end
+    end
+  end,
+})
+
+--
 -- load last session
 --
 vim.schedule(function()
