@@ -202,6 +202,30 @@ return {
   { "npxbr/gruvbox.nvim", dependencies = { "rktjmp/lush.nvim" } },
   { "metalelf0/jellybeans-nvim", dependencies = { "rktjmp/lush.nvim" } },
   { "meliora-theme/neovim", dependencies = { "rktjmp/lush.nvim" } },
+
+  --
+  -- plugins to consider in the future
+  --
+  -- interesing addon
+  -- {
+  --   "chrisgrieser/nvim-various-textobjs",
+  --   event = "VeryLazy",
+  --   opts = {
+  --     keymaps = {
+  --       useDefaults = true,
+  --     },
+  --   },
+  -- },
+  --
+  -- to track keybinds usage like in IDEA
+  -- opencode -s ses_02458b70bffeUkkE7AoErYFGpS
+  -- https://github.com/yutkat/my-neovim-pluginlist
+  -- https://github.com/yutkat/my-neovim-pluginlist/blob/main/analytics.md
+  -- https://github.com/gmatheu/keymap-stats.nvim
+  -- https://www.reddit.com/r/neovim/comments/18sybv3/hawtkeysnvim_suggest_new_easy_to_hit_keymaps_and/
+  -- https://github.com/tris203/hawtkeys.nvim#usage
+  --
+  --
 }
 
 -- vim: ts=2 sts=2 sw=2 et
